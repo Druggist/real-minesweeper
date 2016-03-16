@@ -3,6 +3,7 @@
 
 #include <stdlib.h> 
 #include <allegro5/allegro.h>
+#include <allegro5/allegro_primitives.h>
 #include <iostream>
 
 using namespace std;
@@ -26,8 +27,8 @@ void setLevel(int x, int y, int p, int b);
 bool generateMap();
 bool chooseBombsPos();
 bool openTile(Coords location); //return false if bomb explodes
-short int getTileFromLocation(Coords location);
-void draw();
+int getTileFromLocation(Coords location);
+void drawMap();
 void destroy();
 
 #endif

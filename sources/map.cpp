@@ -83,7 +83,7 @@ bool chooseBombsPos(){
 }
 
 bool openTile(Coords location){
-	int tileNumber = getTileFromLocation;
+	int tileNumber = getTileFromLocation(location);
 	if(map[tileNumber].flag == 0){
 		map[tileNumber].flag = 1;
 		switch(map[tileNumber].type){
@@ -133,12 +133,17 @@ int getTileFromLocation(Coords location){
 	return location.x + sizeX * location.y;
 }
 
-void draw(){
+void drawMap(){
+	int horizontalGap, verticalGap;
 	for(int i=0; i<sizeX*sizeY; i++)
 	{
-		if(map[i].type == -1) cout <<"X";
-		else cout<<map[i].type;
-		if(i != 0 && i % sizeX == sizeX -1) cout<<endl;
+		if(map[i].location.x == 0) verticalGap = 0;
+		else verticalGap = 5;
+		if(map[i].location.y == 0) horizontalGap = 0;
+		else horizontalGap = 5;
+		//al_draw_filled_rectangle(i, i, i+10, i+10, al_map_rgb(255, 255, 255));
+		al_draw_filled_rectangle(map[i].location.x * pixels + verticalGap, map[i].location.y * pixels + horizontalGap, map[i].location.x * pixels + pixels, map[i].location.y * pixels + pixels, map[i].color);
+	 	al_flip_display();
 	}
 }
 
