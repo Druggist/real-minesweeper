@@ -1,6 +1,12 @@
-#include <allegro5/allegro.h>
+#ifndef MAP_H
+#define MAP_H 
 
-int sizeX, sizeY;
+#include <stdlib.h> 
+#include <allegro5/allegro.h>
+#include <iostream>
+
+using namespace std;
+
 struct Coords{
 	int x;
 	int y;
@@ -12,10 +18,18 @@ struct Tile {
 	ALLEGRO_COLOR color;
 };
 
-void setSize(int x, int y);
-bool generateMap();
-bool openTile(Coords location); //return false if bomb explodes
-bool checkBridge(Coords location);
+extern short int sizeX, sizeY, pixels, bombsCount;
+extern Tile *map;
+extern short int *bombsPos;  
 
+void setLevel(int x, int y, int p, int b);
+bool generateMap();
+bool chooseBombsPos();
+bool openTile(Coords location); //return false if bomb explodes
+short int getTileFromLocation(Coords location);
+void draw();
+void destroy();
+
+#endif
 
 
