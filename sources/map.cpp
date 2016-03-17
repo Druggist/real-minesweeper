@@ -1,14 +1,17 @@
 #include "../headers/map.h"
 
-short int sizeX, sizeY, pixels, bombsCount;
+short int sizeX, sizeY, bombsCount, pixels, gap;
+int displayWidth;
 Tile *map;
 short int *bombsPos;  
 
-void setLevel(int x, int y, int p, int b){
+void setLevel(int x, int y, int b, int p, int g, int d){
 	sizeX = x;
 	sizeY = y;
-	pixels = p;
 	bombsCount = b;
+	pixels = p;
+	gap = g;
+	displayWidth = d;
 	return;
 }
 
@@ -16,38 +19,40 @@ bool generateMap(){
 	int size = sizeX*sizeY;
 	if(size > 0){
 		map = new Tile[size];
-		short int y = -1;
 		if (!chooseBombsPos()) return false;
 		int currentBombsCount = 0;
 		for(int i = 0; i < size; i++){
-			if(i % sizeX == 0) y++;
 			map[i].location.x = i % sizeX;
-			map[i].location.y = y;
+			map[i].location.y = i / sizeX;
+			map[i].flag = 0;
+			map[i].type = 0;
+			map[i].color = al_map_rgb(230, 81, 0);
+		}
 			
+		for(int i = 0; i < size; i++){
 			if(i == bombsPos[currentBombsCount]){
 				map[i].type = -1;
 
 				//left side 
-				if(i % sizeX != 0){
+				if(i % sizeX > 0){
 					if(map[i - 1].type != -1)	map[i - 1].type++;
-					if(y != 0 && map[i - sizeX - 1].type != -1) map[i - sizeX - 1].type++;
-					if(y != sizeY && map[i + sizeX - 1].type != -1) map[i + sizeX - 1].type++;
+					if(i / sizeX > 0 && map[i - sizeX - 1].type != -1) map[i - sizeX - 1].type++;
+					if(i / sizeX < sizeY && map[i + sizeX - 1].type != -1) map[i + sizeX - 1].type++;
 				}
 
 				//center
-				if(y != 0 && map[i - sizeX].type != -1) map[i - sizeX].type++;
-				if(y != sizeY && map[i + sizeX].type != -1) map[i + sizeX].type++;
+				if(i / sizeX > 0 && map[i - sizeX].type != -1) map[i - sizeX].type++;
+				if(i / sizeX < sizeY && map[i + sizeX].type != -1) map[i + sizeX].type++;
 
 				//right side
-				if(i % sizeX != sizeX - 1){
+				if(i % sizeX < sizeX - 1){
 					if(map[i + 1].type != -1)	map[i + 1].type++;
-					if(y != 0 && map[i - sizeX + 1].type != -1) map[i - sizeX + 1].type++;
-					if(y != sizeY && map[i + size + 1].type != -1) map[i + sizeX + 1].type++;
+					if(i / sizeX > 0 && map[i - sizeX + 1].type != -1) map[i - sizeX + 1].type++;
+					if(i / sizeX < sizeY && map[i + size + 1].type != -1) map[i + sizeX + 1].type++;
 				}
 				currentBombsCount++;
 			}
 
-			map[i].color = al_map_rgb(158, 158, 158);
 		}
 	} else return false;
 	return true;
@@ -89,11 +94,13 @@ bool openTile(Coords location){
 		switch(map[tileNumber].type){
 			case -1:
 			map[tileNumber].color = al_map_rgb(33, 33, 33);
+			drawMap();
 			return false;
 			break;		
 	
 			case 0:
-			map[tileNumber].color = al_map_rgb(189, 189, 189);
+			map[tileNumber].color = al_map_rgb(255, 183, 77);
+			drawMap();
 			Coords tempLocation;
 			//left
 			if(location.x % sizeX != 0) {
@@ -122,7 +129,8 @@ bool openTile(Coords location){
 			break;
 
 			default:
-			map[tileNumber].color = al_map_rgb(224, 224, 224);
+			map[tileNumber].color = al_map_rgb(255, 152, 0);
+			drawMap();
 			break;
 		}
 	}
@@ -134,17 +142,23 @@ int getTileFromLocation(Coords location){
 }
 
 void drawMap(){
-	int horizontalGap, verticalGap;
-	for(int i=0; i<sizeX*sizeY; i++)
-	{
-		if(map[i].location.x == 0) verticalGap = 0;
-		else verticalGap = 5;
-		if(map[i].location.y == 0) horizontalGap = 0;
-		else horizontalGap = 5;
-		//al_draw_filled_rectangle(i, i, i+10, i+10, al_map_rgb(255, 255, 255));
-		al_draw_filled_rectangle(map[i].location.x * pixels + verticalGap, map[i].location.y * pixels + horizontalGap, map[i].location.x * pixels + pixels, map[i].location.y * pixels + pixels, map[i].color);
-	 	al_flip_display();
-	}
+	al_clear_to_color(al_map_rgb(255, 243, 224));
+	for(int i=0; i<sizeX*sizeY; i++) drawTile(i);
+	al_flip_display();
+}
+
+void drawTile(int tileNumber){
+	int horizontalGap, verticalGap, centered;
+	centered = (displayWidth > sizeX * pixels + (sizeX - 1) * gap)?((displayWidth - (sizeX * pixels + (sizeX - 1) * gap))/2):(0);
+	if(map[tileNumber].location.x == 0) verticalGap = 0;
+		else verticalGap = gap;
+		if(map[tileNumber].location.y == 0) horizontalGap = 0;
+		else horizontalGap = gap;
+		int startX = map[tileNumber].location.x * pixels + verticalGap + centered;
+		int startY = map[tileNumber].location.y * pixels + horizontalGap;
+		int endX = map[tileNumber].location.x * pixels + pixels + centered;
+		int endY = map[tileNumber].location.y * pixels + pixels;
+		al_draw_filled_rectangle(startX, startY, endX, endY, map[tileNumber].color);
 }
 
 void destroy(){

@@ -19,16 +19,20 @@ struct Tile {
 	ALLEGRO_COLOR color;
 };
 
-extern short int sizeX, sizeY, pixels, bombsCount;
+extern short int sizeX, sizeY, bombsCount, pixels, gap;
+extern int displayWidth;
 extern Tile *map;
 extern short int *bombsPos;  
 
-void setLevel(int x, int y, int p, int b);
-bool generateMap();
+void setLevel(int x, int y, int b, int p, int g, int d);
 bool chooseBombsPos();
 bool openTile(Coords location); //return false if bomb explodes
 int getTileFromLocation(Coords location);
+bool generateMap();
 void drawMap();
+void drawTile(int drawTile);
+bool saveMap();
+bool loadMap();
 void destroy();
 
 #endif

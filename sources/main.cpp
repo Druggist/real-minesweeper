@@ -23,10 +23,18 @@ int main(int argc, char **argv) {
     	return -1;
   	}
     al_set_window_title( window,"Real minesweeper");
-  	setLevel(10,10,50,10);
+  	setLevel(10, 10, 5, 50, 5, al_get_display_width(window));
   	generateMap();
   	drawMap();
-    sleep(2);
+    sleep(1);
+    Coords location;
+    for(int i = 0; i<100; i++){
+    location.x = i % 10;
+    location.y = i /10;
+    if(!openTile(location)) break;
+    sleep(1);
+}
+sleep(2);
     al_destroy_display(window);
     return 0;
 }
