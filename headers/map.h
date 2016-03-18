@@ -16,7 +16,7 @@ struct Tile {
 	ALLEGRO_COLOR color;
 };
 
-extern short int sizeX, sizeY, bombsCount, currentBombsCount, openTiles;
+extern short int sizeX, sizeY, bombsCount, flaggedBombs, openTiles;
 extern Tile *map;
 extern short int *bombsPos, playerPos;  
 
@@ -31,6 +31,7 @@ bool allTilesOpen();
 bool generateMap();
 bool saveMap();
 bool loadMap();
+void toggleTileFlag(Coords location);
 void destroyMap();
 
 #endif

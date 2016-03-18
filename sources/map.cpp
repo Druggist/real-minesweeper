@@ -1,6 +1,6 @@
 #include "../headers/map.h"
 
-short int sizeX, sizeY, bombsCount;
+short int sizeX, sizeY, bombsCount, flaggedBombs, openTiles;
 int displayWidth;
 Tile *map;
 short int *bombsPos, playerPos;  
@@ -9,6 +9,8 @@ void setLevel(int x, int y, int b){
 	sizeX = x;
 	sizeY = y;
 	bombsCount = b;
+	flaggedBombs = 0;
+	openTiles = 1;
 	return;
 }
 
@@ -157,6 +159,7 @@ bool openTile(Coords location){
 			map[tileNumber].color = al_map_rgb(255, 152, 0);
 			break;
 		}
+		openTiles++;
 	}
 	return true;
 }
@@ -167,6 +170,25 @@ int getTileFromLocation(Coords location){
 
 Coords getLocationFromTile(int tileNumber){
 	return map[tileNumber].location;
+}
+
+bool allTilesOpen(){
+	if(openTiles == sizeX * sizeY - bombsCount) return true;
+	return false;
+}
+
+bool allBombsFlagged(){
+	if(flaggedBombs == bombsCount) return true;
+	return false;
+}
+
+void toggleTileFlag(Coords location){
+	if(map[getTileFromLocation(location)].flag != -1 && map[getTileFromLocation(location)].flag != 1){
+		map[getTileFromLocation(location)].flag = (map[getTileFromLocation(location)].flag == 0 || map[getTileFromLocation(location)].flag == 3)?(2):(0);
+		map[getTileFromLocation(location)].color = al_map_rgb(211, 47, 47);
+		if(map[getTileFromLocation(location)].type == -1) flaggedBombs++;
+	}
+	return;
 }
 
 void destroyMap(){

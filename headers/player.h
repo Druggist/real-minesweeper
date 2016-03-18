@@ -16,10 +16,7 @@ extern Player player;
 
 void getInput();
 void spawnPlayer(Coords location, short int flagsEquipped);
-Coords moveLeft();
-Coords moveRight();
-Coords moveUp();
-Coords moveDown();
+void move(Coords nextLocation);
 
 
 #endif

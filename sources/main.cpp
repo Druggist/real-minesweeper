@@ -61,29 +61,41 @@ int main(int argc, char **argv) {
   	generateMap();
   	spawnPlayer(getLocationFromTile(playerPos), bombsCount);
   	draw(size, pixels, gap, al_get_display_width(window));
-
+  	Coords nextLocation;
   	do{
   		al_wait_for_event(eventQueue, &event);
   		if( event.type == ALLEGRO_EVENT_KEY_DOWN){
 	  		if(event.keyboard.keycode  == ALLEGRO_KEY_A) {
-	        		moveLeft();
-	        		if(!openTile(player.location))  al_clear_to_color(al_map_rgb(255, 243, 224));
-	        		else draw(size, pixels, gap, al_get_display_width(window));
+	  			nextLocation = player.location;
+	  			if(nextLocation.x > 0) nextLocation.x--;
+	       		move(nextLocation);
+	       		if(!openTile(player.location))  al_clear_to_color(al_map_rgb(255, 243, 224));
+	       		else draw(size, pixels, gap, al_get_display_width(window));
+	        	if(allTilesOpen())  al_clear_to_color(al_map_rgb(0, 0, 0));
 	        } 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_D) {
-	        	moveRight();
+	        	nextLocation = player.location;
+	        	if(nextLocation.x < size.y -1) nextLocation.x++;
+	       		move(nextLocation);
 	        	if(!openTile(player.location))  al_clear_to_color(al_map_rgb(255, 243, 224));
 	        	else draw(size, pixels, gap, al_get_display_width(window));
+	        	if(allTilesOpen())  al_clear_to_color(al_map_rgb(0, 0, 0));
 	        } 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_W) {
-	        	moveUp();
+	        	nextLocation = player.location;
+	        	if(nextLocation.y > 0) nextLocation.y--;
+	       		move(nextLocation);
 	        	if(!openTile(player.location))  al_clear_to_color(al_map_rgb(255, 243, 224));
 	        	else draw(size, pixels, gap, al_get_display_width(window));
+	        	if(allTilesOpen())  al_clear_to_color(al_map_rgb(0, 0, 0));
 	        } 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_S) {
-	        	moveDown();
+	        	nextLocation = player.location;
+	        	if(nextLocation.y < size.y -1) nextLocation.y++;
+	       		move(nextLocation);
 	        	if(!openTile(player.location))  al_clear_to_color(al_map_rgb(255, 243, 224));
 	        	else draw(size, pixels, gap, al_get_display_width(window));
+	           	if(allTilesOpen())  al_clear_to_color(al_map_rgb(0, 0, 0));
 	        } 
 	        al_flip_display();
     	}
