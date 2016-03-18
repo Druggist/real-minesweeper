@@ -1,17 +1,14 @@
 #include "../headers/map.h"
 
-short int sizeX, sizeY, bombsCount, pixels, gap;
+short int sizeX, sizeY, bombsCount;
 int displayWidth;
 Tile *map;
-short int *bombsPos;  
+short int *bombsPos, playerPos;  
 
-void setLevel(int x, int y, int b, int p, int g, int d){
+void setLevel(int x, int y, int b){
 	sizeX = x;
 	sizeY = y;
 	bombsCount = b;
-	pixels = p;
-	gap = g;
-	displayWidth = d;
 	return;
 }
 
@@ -19,7 +16,7 @@ bool generateMap(){
 	int size = sizeX*sizeY;
 	if(size > 0){
 		map = new Tile[size];
-		if (!chooseBombsPos()) return false;
+		if (!setBombsPos()) return false;
 		int currentBombsCount = 0;
 		for(int i = 0; i < size; i++){
 			map[i].location.x = i % sizeX;
@@ -54,11 +51,12 @@ bool generateMap(){
 			}
 
 		}
+		if(!setPlayerPos()) return false; 
 	} else return false;
 	return true;
 }
 
-bool chooseBombsPos(){
+bool setBombsPos(){
 	if(bombsCount > 0 && bombsCount < sizeX * sizeY){
 		bombsPos = new short int[bombsCount];
 		for(int i = 0; i < bombsCount; i++){
@@ -87,6 +85,15 @@ bool chooseBombsPos(){
 	return true;
 }
 
+bool setPlayerPos(){
+	playerPos = rand() % (sizeX * sizeY);
+	if(bombsCount == sizeX * sizeY) return false;
+	while(map[playerPos].type == -1) playerPos = rand() % (sizeX * sizeY);
+	map[playerPos].color = al_map_rgb(175, 180, 43);
+	map[playerPos].flag = 1;
+	return true;
+}
+
 bool openTile(Coords location){
 	int tileNumber = getTileFromLocation(location);
 	if(map[tileNumber].flag == 0){
@@ -94,34 +101,52 @@ bool openTile(Coords location){
 		switch(map[tileNumber].type){
 			case -1:
 			map[tileNumber].color = al_map_rgb(33, 33, 33);
-			drawMap();
 			return false;
 			break;		
 	
 			case 0:
-			map[tileNumber].color = al_map_rgb(255, 183, 77);
-			drawMap();
+			map[tileNumber].color = al_map_rgb(255, 204, 128);
 			Coords tempLocation;
 			//left
-			if(location.x % sizeX != 0) {
+			if(location.x > 0) {
 				tempLocation.x = location.x - 1;
 				tempLocation.y = location.y;
 				openTile(tempLocation);	
+				if(location.y > 0){
+					tempLocation.x = location.x - 1;
+					tempLocation.y = location.y - 1;
+					openTile(tempLocation);	
+				}
+				if(location.y < sizeY - 1){
+					tempLocation.x = location.x - 1;
+					tempLocation.y = location.y + 1;
+					openTile(tempLocation);	
+				}
 			}
 			//right
-			if(location.x % sizeX != sizeX - 1) {
+			if(location.x < sizeX - 1) {
 				tempLocation.x = location.x + 1;
 				tempLocation.y = location.y;
-				openTile(tempLocation);	
+				openTile(tempLocation);
+				if(location.y > 0){
+					tempLocation.x = location.x + 1;
+					tempLocation.y = location.y - 1;
+					openTile(tempLocation);	
+				}
+				if(location.y < sizeY - 1){
+					tempLocation.x = location.x + 1;
+					tempLocation.y = location.y + 1;
+					openTile(tempLocation);	
+				}	
 			}
 			//top
-			if(location.y != 0) {
+			if(location.y > 0) {
 				tempLocation.x = location.x;
 				tempLocation.y = location.y - 1;
 				openTile(tempLocation);	
 			}
 			//bottom
-			if(location.y != sizeY - 1) {
+			if(location.y < sizeY - 1) {
 				tempLocation.x = location.x;
 				tempLocation.y = location.y + 1;
 				openTile(tempLocation);	
@@ -130,7 +155,6 @@ bool openTile(Coords location){
 
 			default:
 			map[tileNumber].color = al_map_rgb(255, 152, 0);
-			drawMap();
 			break;
 		}
 	}
@@ -141,27 +165,11 @@ int getTileFromLocation(Coords location){
 	return location.x + sizeX * location.y;
 }
 
-void drawMap(){
-	al_clear_to_color(al_map_rgb(255, 243, 224));
-	for(int i=0; i<sizeX*sizeY; i++) drawTile(i);
-	al_flip_display();
+Coords getLocationFromTile(int tileNumber){
+	return map[tileNumber].location;
 }
 
-void drawTile(int tileNumber){
-	int horizontalGap, verticalGap, centered;
-	centered = (displayWidth > sizeX * pixels + (sizeX - 1) * gap)?((displayWidth - (sizeX * pixels + (sizeX - 1) * gap))/2):(0);
-	if(map[tileNumber].location.x == 0) verticalGap = 0;
-		else verticalGap = gap;
-		if(map[tileNumber].location.y == 0) horizontalGap = 0;
-		else horizontalGap = gap;
-		int startX = map[tileNumber].location.x * pixels + verticalGap + centered;
-		int startY = map[tileNumber].location.y * pixels + horizontalGap;
-		int endX = map[tileNumber].location.x * pixels + pixels + centered;
-		int endY = map[tileNumber].location.y * pixels + pixels;
-		al_draw_filled_rectangle(startX, startY, endX, endY, map[tileNumber].color);
-}
-
-void destroy(){
+void destroyMap(){
 	if(map != NULL) delete[] map;
 	if(bombsPos != NULL) delete[] bombsPos;
 	return;
