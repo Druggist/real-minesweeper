@@ -24,14 +24,16 @@ void setLevel(int x, int y, int b);
 bool setBombsPos();
 bool setPlayerPos();
 bool openTile(Coords location); //return false if bomb explodes
+void openAll();
 int getTileFromLocation(Coords location);
 Coords getLocationFromTile(int tileNumber);
 bool allBombsFlagged();
 bool allTilesOpen();
+bool win();
 bool generateMap();
 bool saveMap();
 bool loadMap();
-void toggleTileFlag(Coords location);
+void toggleTileFlag(Coords location, short int flag);
 void destroyMap();
 
 #endif

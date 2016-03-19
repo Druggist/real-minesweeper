@@ -7,6 +7,7 @@
 struct Player{
 	Coords location;
 	ALLEGRO_COLOR color;
+	ALLEGRO_COLOR equipmentColor;
 	short int flagsEquipped;	
 };
 

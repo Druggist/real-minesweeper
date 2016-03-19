@@ -15,6 +15,7 @@ void setLevel(int x, int y, int b){
 }
 
 bool generateMap(){
+	destroyMap();
 	int size = sizeX*sizeY;
 	if(size > 0){
 		map = new Tile[size];
@@ -36,18 +37,18 @@ bool generateMap(){
 				if(i % sizeX > 0){
 					if(map[i - 1].type != -1)	map[i - 1].type++;
 					if(i / sizeX > 0 && map[i - sizeX - 1].type != -1) map[i - sizeX - 1].type++;
-					if(i / sizeX < sizeY && map[i + sizeX - 1].type != -1) map[i + sizeX - 1].type++;
+					if(i / sizeX < sizeY - 1 && map[i + sizeX - 1].type != -1) map[i + sizeX - 1].type++;
 				}
 
 				//center
 				if(i / sizeX > 0 && map[i - sizeX].type != -1) map[i - sizeX].type++;
-				if(i / sizeX < sizeY && map[i + sizeX].type != -1) map[i + sizeX].type++;
+				if(i / sizeX < sizeY - 1 && map[i + sizeX].type != -1) map[i + sizeX].type++;
 
 				//right side
 				if(i % sizeX < sizeX - 1){
 					if(map[i + 1].type != -1)	map[i + 1].type++;
 					if(i / sizeX > 0 && map[i - sizeX + 1].type != -1) map[i - sizeX + 1].type++;
-					if(i / sizeX < sizeY && map[i + size + 1].type != -1) map[i + sizeX + 1].type++;
+					if(i / sizeX < sizeY - 1 && map[i + size + 1].type != -1) map[i + sizeX + 1].type++;
 				}
 				currentBombsCount++;
 			}
@@ -182,11 +183,37 @@ bool allBombsFlagged(){
 	return false;
 }
 
-void toggleTileFlag(Coords location){
+bool win(){
+	if(allBombsFlagged() || allTilesOpen()) return true;
+	return false;
+}
+
+void toggleTileFlag(Coords location, short int flag){
 	if(map[getTileFromLocation(location)].flag != -1 && map[getTileFromLocation(location)].flag != 1){
-		map[getTileFromLocation(location)].flag = (map[getTileFromLocation(location)].flag == 0 || map[getTileFromLocation(location)].flag == 3)?(2):(0);
-		map[getTileFromLocation(location)].color = al_map_rgb(211, 47, 47);
-		if(map[getTileFromLocation(location)].type == -1) flaggedBombs++;
+		map[getTileFromLocation(location)].flag = (map[getTileFromLocation(location)].flag != flag)?(flag):(0);
+		ALLEGRO_COLOR color;
+		switch(map[getTileFromLocation(location)].flag){
+			case 2: 
+				color = al_map_rgb(183, 28, 28);
+				break;
+
+			case 3:
+				color = al_map_rgb(93, 64, 55);
+				break;
+
+			default:
+				color = al_map_rgb(230, 81, 0);
+				break;
+		}
+		map[getTileFromLocation(location)].color = color;
+		if(map[getTileFromLocation(location)].type == -1 && flag == 2) flaggedBombs++;
+	}
+	return;
+}
+
+void openAll(){
+	for(int i = 0; i < sizeX * sizeY; i++){
+		if(map[i].flag != -1) openTile(getLocationFromTile(i));
 	}
 	return;
 }
