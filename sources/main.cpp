@@ -5,6 +5,7 @@
 
 bool isExiting = false, isPlaying = false;
 Coords size;
+int bombs;
 int pixels = 50;
 int gap = 5;
 
@@ -245,7 +246,7 @@ void drawMenu(int displayHeight, int displayWidth){
 	int padding = 20;
 	int previousWidth = 0;
 	al_draw_text(titleFont, titleColor, horizontalMargin, 50, ALLEGRO_ALIGN_CENTRE, menuTitle.c_str());
-	if(isHorizontal) horizontalMargin -= 200;
+	if(isHorizontal) horizontalMargin -= 100 * (rowElementsCount / 2);
 	for(int i = 0; i < elementsCount; i++){
 		previousWidth = 100;
 		al_draw_text(menu[i].font, (menu[i].hover)?(menu[i].hoverColor):(menu[i].mainColor), menu[i].location.x * previousWidth + horizontalMargin, menu[i].location.y * (al_get_font_line_height(menu[i].font) + padding) + verticalMargin, ALLEGRO_ALIGN_CENTRE, menu[i].text.c_str());
@@ -295,40 +296,60 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "EASY"){
 		size.x = 10;
 		size.y = 10;
-		setLevel(size.x, size.y, 20);
+		bombs = 20;
+		setLevel(size.x, size.y, bombs);
   		generateMap();
   		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
 		isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "MEDIUM"){
 		size.x = 15;
 		size.y = 10;
-		setLevel(size.x, size.y, 40);
+		bombs = 40;
+		setLevel(size.x, size.y, bombs);
   		generateMap();
   		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
 		isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "HARD"){
 		size.x = 20;
 		size.y = 20;
-		setLevel(size.x, size.y, 150);
+		bombs = 150;
+		setLevel(size.x, size.y, bombs);
   		generateMap();
   		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
 		isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "CUSTOM"){
-		//TODO Get size and bombscount from player
-		/*
-		size.x = 5;
-		size.y = 5;
-		setLevel(size.x, size.y, 1);
+		size.x = 2;
+		size.y = 2;
+		bombs = 1;
+		templateCustom();
+	} else if(menu[hoverElement].nextAction == "SUBSTRACT_SIZE_X"){
+		if(size.x > 2) size.x--;
+		setText(4, to_string(size.x));		
+	} else if(menu[hoverElement].nextAction == "SUBSTRACT_SIZE_Y"){
+		if(size.y > 2) size.y--;	
+		setText(10, to_string(size.y));		
+	} else if(menu[hoverElement].nextAction == "SUBSTRACT_BOMBS"){
+		if(bombs > 1) bombs--;	
+		setText(16, to_string(bombs));		
+	} else if(menu[hoverElement].nextAction == "ADD_SIZE_X"){
+		if(size.x < 100) size.x++;	
+		setText(4, to_string(size.x));		
+	} else if(menu[hoverElement].nextAction == "ADD_SIZE_Y"){
+		if(size.y < 100) size.y++;
+		setText(10, to_string(size.y));		
+	} else if(menu[hoverElement].nextAction == "ADD_BOMBS"){
+		if(bombs < size.x * size.y - 2 && bombs < 1000) bombs++;
+		setText(16, to_string(bombs));		
+	} else if(menu[hoverElement].nextAction == "START_CUSTOM"){
+		setLevel(size.x, size.y, bombs);
   		generateMap();
   		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
-		isPlaying = true;*/
+		isPlaying = true;						
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){
 		templateNewGame();
 	} else if(menu[hoverElement].nextAction == "RESUME"){
 		isPlaying =	true;
 	} else if(menu[hoverElement].nextAction == "SAVE_MAP"){
 		//TODO GAME MAP SAVING
-	} else {
-		isExiting = true;
 	}
 }

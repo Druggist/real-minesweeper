@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <iostream> 
 #include <time.h>   
+#include <string>   
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include "global.h"

@@ -16,6 +16,7 @@ struct MenuElement{
 	string text;
 	string nextAction;
 	bool hover;
+	bool enabled;
 };
 
 extern MenuElement *menu;
@@ -24,16 +25,18 @@ extern string menuTitle;
 extern ALLEGRO_COLOR titleColor;
 extern ALLEGRO_FONT *titleFont;
 extern bool isHorizontal;
+extern short int rowElementsCount;
 
 void initMenu(int e, string t);
-void generateMenu(bool horizontalMenu);  //type true horizontal false vertical
+void generateMenu(bool horizontalMenu, short int elementsInRow);  //type true horizontal false vertical
 void setText(int element, string text);
+void setEnabled(int element, bool enable);
 void setNextAction(int element, string nextAction);
 void navigateUp();
 void navigateDown();
 void navigateLeft();
 void navigateRight();
-bool navigate(Coords nextLocation);
+int navigate(Coords nextLocation);
 int elementExistsCoords(Coords location);
 void destroyMenu();
 //tempalates
@@ -44,5 +47,6 @@ void templateArcade();
 void templateRetro();
 void templatePause();
 void templateStatus(bool win);
+void templateCustom();
 
 #endif
