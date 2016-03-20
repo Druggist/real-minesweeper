@@ -158,21 +158,33 @@ void templateMain(){
 	initMenu(3, "Main menu");
 	generateMenu(false, 0);
 	setText(0, "Game");
-	setNextAction(0, "NEW_LOAD");
+	setNextAction(0, "NEW_LOAD_GAME");
 	setText(1, "Editor");
-	setNextAction(1, "NEW_LOAD");
+	setNextAction(1, "NEW_LOAD_MAP");
 	setText(2, "Exit");
 	setNextAction(2, "EXIT");
 }
 
-void templateNewLoad(bool game){
+void templateNewLoadGame(){
 	destroyMenu();
-	initMenu(3, (game)?("Start game"):("Create map"));
+	initMenu(3, "Start game");
 	generateMenu(false, 0);
 	setText(0, "New");
-	setNextAction(0, (game)?("NEW_GAME"):("NEW_MAP"));
+	setNextAction(0, "NEW_GAME");
 	setText(1, "Load");
-	setNextAction(1, (game)?("LOAD_GAME"):("LOAD_MAP"));
+	setNextAction(1, "LOAD_GAME");
+	setText(2, "Back");
+	setNextAction(2, "MAIN");
+}
+
+void templateNewLoadMap(){
+	destroyMenu();
+	initMenu(3, "Create map");
+	generateMenu(false, 0);
+	setText(0, "New");
+	setNextAction(0, "NEW_MAP");
+	setText(1, "Load");
+	setNextAction(1, "LOAD_MAP");
 	setText(2, "Back");
 	setNextAction(2, "MAIN");
 }
@@ -186,7 +198,7 @@ void templateNewGame(){
 	setText(1, "Retro");
 	setNextAction(1, "RETRO");
 	setText(2, "Back");
-	setNextAction(2, "NEW_LOAD");
+	setNextAction(2, "NEW_LOAD_GAME");
 }
 
 void templateArcade(){
@@ -252,7 +264,7 @@ void templateStatus(bool win){
 	setText(0, "Save map");
 	setNextAction(0, "SAVE_MAP");
 	setText(1, "Main menu");
-	setNextAction(1, "NEW_GAME");
+	setNextAction(1, "NEW_LOAD_GAME"); 
 }
 
 void templateCustom(){
@@ -297,4 +309,38 @@ void templateCustom(){
 	setEnabled(19, false);
 	setText(20, "Start");
 	setNextAction(20, "START_CUSTOM");
+}
+
+void templateNewMap(){
+	destroyMenu();
+	initMenu(15, "Custom map");
+	generateMenu(true, 3);
+	setText(0, "Size X:");
+	setEnabled(0, false);
+	menu[0].hover = false;
+	setEnabled(1, false);
+	setEnabled(2, false);
+	setText(3, "<<");
+	setNextAction(3, "SUBSTRACT_SIZE_X");
+	menu[3].hover = true;
+	hoverElement = 3;
+	setText(4, "2");
+	setEnabled(4, false);
+	setText(5, ">>");
+	setNextAction(5, "ADD_SIZE_X");
+	setText(6, "Size Y:");
+	setEnabled(6, false);
+	setEnabled(7, false);
+	setEnabled(8, false);
+	setText(9, "<<");
+	setNextAction(9, "SUBSTRACT_SIZE_Y");
+	setText(10, "2");
+	setEnabled(10, false);
+	setText(11, ">>");
+	setNextAction(11, "ADD_SIZE_Y");
+	setText(12, "Back");
+	setNextAction(12, "NEW_LOAD_MAP");
+	setEnabled(13, false);
+	setText(14, "Start");
+	setNextAction(14, "NEW_MAP_CREATE");
 }

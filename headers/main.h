@@ -12,13 +12,12 @@
 using namespace std;
 
 extern ALLEGRO_DISPLAY *window;
-extern ALLEGRO_EVENT_QUEUE *eventQueue;
-extern ALLEGRO_EVENT event;
-extern bool isExiting, isPlaying;
+extern bool isExiting, isPlaying, isEditing, inEditor;
 extern Coords size;
 extern int pixels, gap;
 
 void drawGame(int displayWidth);
+void drawEditor(int displayWidth);
 void drawMenu(int displayHeight, int displayWidth);
 void menuLogic();
 

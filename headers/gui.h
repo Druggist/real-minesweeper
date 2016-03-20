@@ -41,8 +41,10 @@ int elementExistsCoords(Coords location);
 void destroyMenu();
 //tempalates
 void templateMain();
-void templateNewLoad(bool game);
+void templateNewLoadGame();
+void templateNewLoadMap();
 void templateNewGame();
+void templateNewMap();
 void templateArcade();
 void templateRetro();
 void templatePause();

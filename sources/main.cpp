@@ -3,9 +3,9 @@
 #include "../headers/map.h"
 #include "../headers/gui.h"
 
-bool isExiting = false, isPlaying = false;
-Coords size;
-int bombs;
+bool isExiting = false, isPlaying = false, isEditing = false, inEdtior = false;
+Coords size = {2, 2};
+int bombs = 1; 
 int pixels = 50;
 int gap = 5;
 ALLEGRO_DISPLAY *window;
@@ -22,6 +22,12 @@ int main(int argc, char **argv) {
     	cout << "failed to initialize keyboard!\n";
     	return -1;
     }
+
+	if(!al_install_mouse()){
+    	cout << "failed to initialize mouse!\n";
+    	return -1;
+    }
+
     if(!al_init_primitives_addon()){
        	cout << "failed to initialize primitives!\n";
     	return -1;
@@ -32,6 +38,7 @@ int main(int argc, char **argv) {
     ALLEGRO_EVENT event;
     ALLEGRO_EVENT_QUEUE *eventQueue = al_create_event_queue();
     al_register_event_source(eventQueue, al_get_keyboard_event_source());
+    al_register_event_source(eventQueue, al_get_mouse_event_source());
     al_set_window_title( window,"Real minesweeper");
 
    	if(!window){
@@ -43,168 +50,252 @@ int main(int argc, char **argv) {
   	drawMenu(al_get_display_height(window), al_get_display_width(window));
 
   	Coords nextLocation;
-  	short int setFlag = 0;
+  	short int setFlag = 0, currentMode = 1;
   	do{
   		al_wait_for_event(eventQueue, &event);
 
   		if( event.type == ALLEGRO_EVENT_KEY_DOWN){
-
-  			//flagging & questioning
-  			if(event.keyboard.keycode == ALLEGRO_KEY_Q){
-  				if(isPlaying){
-  					setFlag = (setFlag == 0)?(3):(0);
-  					player.equipmentColor = (setFlag == 3)?(al_map_rgb(93, 64, 55)):(al_map_rgb(175, 180, 43));
-	       			drawGame(al_get_display_width(window));
-	       		}
-  			}
-
-  			if(event.keyboard.keycode == ALLEGRO_KEY_F){ 
-  				if(isPlaying){
-  					setFlag = (setFlag == 0)?(2):(0);
-  					player.equipmentColor = (setFlag == 2)?(al_map_rgb(183, 28, 28)):(al_map_rgb(175, 180, 43));
-	       			drawGame(al_get_display_width(window));
-  				}
-			}
-
-			//moving
-	  		if(event.keyboard.keycode  == ALLEGRO_KEY_A || event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
-	  			if(isPlaying){
-	  				nextLocation = player.location;
-		  			
-		  			if(nextLocation.x > 0) nextLocation.x--;
-		  			if(setFlag == 0) move(nextLocation);
-		  			else toggleTileFlag(nextLocation, setFlag);
-	       			
-	       			if(!openTile(player.location)){
-	       				openAll();
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(false);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else if(win()){
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(true);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else{
-	       				drawGame(al_get_display_width(window));
-					}
-	  			}else{
-	  				navigateLeft();
-	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+  			if(!isEditing){
+	  			//flagging & questioning
+	  			if(event.keyboard.keycode == ALLEGRO_KEY_Q){
+	  				if(isPlaying){
+	  					setFlag = (setFlag == 0)?(3):(0);
+	  					player.equipmentColor = (setFlag == 3)?(al_map_rgb(93, 64, 55)):(al_map_rgb(175, 180, 43));
+		       			drawGame(al_get_display_width(window));
+		       		}
 	  			}
-	        } 
 
-	        if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode  == ALLEGRO_KEY_RIGHT) {
-	  			if(isPlaying){
-	  				nextLocation = player.location;
-		  			
-		  			if(nextLocation.x < size.x -1) nextLocation.x++;
-		  			if(setFlag == 0) move(nextLocation);
-		  			else toggleTileFlag(nextLocation, setFlag);
-	       			
-	       			if(!openTile(player.location)){
-	       				openAll();
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(false);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else if(win()){
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(true);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else{
-	       				drawGame(al_get_display_width(window));
-					}
-	  			}else{
-	  				navigateRight();
-	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
-	  			}
-	        } 
+	  			if(event.keyboard.keycode == ALLEGRO_KEY_F){ 
+	  				if(isPlaying){
+	  					setFlag = (setFlag == 0)?(2):(0);
+	  					player.equipmentColor = (setFlag == 2)?(al_map_rgb(183, 28, 28)):(al_map_rgb(175, 180, 43));
+		       			drawGame(al_get_display_width(window));
+	  				}
+				}
 
-	        if(event.keyboard.keycode == ALLEGRO_KEY_W || event.keyboard.keycode  == ALLEGRO_KEY_UP) {
-	  			if(isPlaying){
-	  				nextLocation = player.location;
-		  			
-		  			if(nextLocation.y > 0) nextLocation.y--;
-		  			if(setFlag == 0) move(nextLocation);
-		  			else toggleTileFlag(nextLocation, setFlag);
-	       			
-	       			if(!openTile(player.location)){
-	       				openAll();
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(false);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else if(win()){
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(true);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else{
-	       				drawGame(al_get_display_width(window));
-					}
-	  			}else{
-	  				navigateUp();
-	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
-	  			}
-	        } 
+				//moving
+		  		if(event.keyboard.keycode  == ALLEGRO_KEY_A || event.keyboard.keycode == ALLEGRO_KEY_LEFT) {
+		  			if(isPlaying){
+		  				nextLocation = player.location;
+			  			
+			  			if(nextLocation.x > 0) nextLocation.x--;
+			  			if(setFlag == 0) move(nextLocation);
+			  			else toggleTileFlag(nextLocation, setFlag);
+		       			
+		       			if(!openTile(player.location)){
+		       				openAll();
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(false);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else if(win()){
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(true);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else{
+		       				drawGame(al_get_display_width(window));
+						}
+		  			}else{
+		  				navigateLeft();
+		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+		  			}
+		        } 
 
-	        if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode  == ALLEGRO_KEY_DOWN) {
-	  			if(isPlaying){
-	  				nextLocation = player.location;
-		  			
-		  			if(nextLocation.y < size.y -1) nextLocation.y++;
-		  			if(setFlag == 0) move(nextLocation);
-		  			else {
-		  				toggleTileFlag(nextLocation, setFlag);
-	       			}
+		        if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode  == ALLEGRO_KEY_RIGHT) {
+		  			if(isPlaying){
+		  				nextLocation = player.location;
+			  			
+			  			if(nextLocation.x < size.x -1) nextLocation.x++;
+			  			if(setFlag == 0) move(nextLocation);
+			  			else toggleTileFlag(nextLocation, setFlag);
+		       			
+		       			if(!openTile(player.location)){
+		       				openAll();
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(false);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else if(win()){
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(true);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else{
+		       				drawGame(al_get_display_width(window));
+						}
+		  			}else{
+		  				navigateRight();
+		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+		  			}
+		        } 
 
-	       			if(!openTile(player.location)){
-	       				openAll();
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(false);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else if(win()){
-	       				drawGame(al_get_display_width(window));
-	       				templateStatus(true);
-	       				al_rest(2.0);
-	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       				isPlaying = false;
-	       			}else{
-	       				drawGame(al_get_display_width(window));
-					}
-	  			}else{
-	  				navigateDown();
-	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
-	  			}	        	
-	        } 
+		        if(event.keyboard.keycode == ALLEGRO_KEY_W || event.keyboard.keycode  == ALLEGRO_KEY_UP) {
+		  			if(isPlaying){
+		  				nextLocation = player.location;
+			  			
+			  			if(nextLocation.y > 0) nextLocation.y--;
+			  			if(setFlag == 0) move(nextLocation);
+			  			else toggleTileFlag(nextLocation, setFlag);
+		       			
+		       			if(!openTile(player.location)){
+		       				openAll();
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(false);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else if(win()){
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(true);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else{
+		       				drawGame(al_get_display_width(window));
+						}
+		  			}else{
+		  				navigateUp();
+		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+		  			}
+		        } 
 
-	        //pausing & entering
+		        if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode  == ALLEGRO_KEY_DOWN) {
+		  			if(isPlaying){
+		  				nextLocation = player.location;
+			  			
+			  			if(nextLocation.y < size.y -1) nextLocation.y++;
+			  			if(setFlag == 0) move(nextLocation);
+			  			else {
+			  				toggleTileFlag(nextLocation, setFlag);
+		       			}
+
+		       			if(!openTile(player.location)){
+		       				openAll();
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(false);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else if(win()){
+		       				drawGame(al_get_display_width(window));
+		       				templateStatus(true);
+		       				al_rest(2.0);
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				isPlaying = false;
+		       			}else{
+		       				drawGame(al_get_display_width(window));
+						}
+		  			}else{
+		  				navigateDown();
+		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+		  			}	        	
+		        } 
+		        //pausing & entering
+		        if(event.keyboard.keycode == ALLEGRO_KEY_ENTER){
+		        	if(!isPlaying){
+		        		menuLogic();
+		        		if(!isPlaying && !isEditing) drawMenu(al_get_display_height(window), al_get_display_width(window));
+		        		else{
+		        			 if(isPlaying) drawGame(al_get_display_width(window));
+		        			else drawEditor(al_get_display_width(window));
+		        		}
+		        	}
+		        }
+	    	}
+
 	        if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
-	        	if(isPlaying){
+	        	if(isPlaying || isEditing){
 	        		templatePause();
 	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
 	        		isPlaying = false;
+	        		isEditing = false;
 	        	}
 	        }
 
-	        if(event.keyboard.keycode == ALLEGRO_KEY_ENTER){
-	        	if(!isPlaying){
-	        		menuLogic();
-	        		if(!isPlaying) drawMenu(al_get_display_height(window), al_get_display_width(window));
-	        		else drawGame(al_get_display_width(window));
-	        	}
+	        //editor modes
+	        if(isEditing){
+	        	if(event.keyboard.keycode == ALLEGRO_KEY_1){
+		        	currentMode = 1;
+		        	drawEditor(al_get_display_width(window));
+	       		}
+	       		if(event.keyboard.keycode == ALLEGRO_KEY_2){
+		        	currentMode = 2;
+		        	drawEditor(al_get_display_width(window));
+	       		}
+	       		if(event.keyboard.keycode == ALLEGRO_KEY_3){
+		        	currentMode = 3;
+		        	drawEditor(al_get_display_width(window));
+	       		}
+	       		if(event.keyboard.keycode == ALLEGRO_KEY_4){
+		        	currentMode = 4;
+		        	drawEditor(al_get_display_width(window));
+	       		}
+	       		if(event.keyboard.keycode == ALLEGRO_KEY_5){
+		        	currentMode = 5;
+		        	drawEditor(al_get_display_width(window));
+	       		}
+	       		if(event.keyboard.keycode == ALLEGRO_KEY_6){
+		        	currentMode = 6;
+		        	drawEditor(al_get_display_width(window));
+	       		}
+	       		if(event.keyboard.keycode == ALLEGRO_KEY_7){
+		        	currentMode = 7;
+		        	drawEditor(al_get_display_width(window));
+	       		}
 	        }
+    	}
+
+    	if( event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
+    		if(isEditing){
+    			Coords clickedTile, start, end;
+				int horizontalMargin = (al_get_display_width(window) > size.x * pixels + (size.x - 1) * gap)?((al_get_display_width(window) - (size.x * pixels + (size.x - 1) * gap))/2):(0);
+    			int x = event.mouse.x; 
+    			int y = event.mouse.y;
+    			for(int i = 0; i < size.x * size.y; i++){
+	    			start.x = map[i].location.x * pixels + gap + horizontalMargin;
+					start.y = map[i].location.y * pixels + gap + 100;
+					end.x = map[i].location.x * pixels + pixels + horizontalMargin;
+					end.y = map[i].location.y * pixels + pixels + 100;
+	    			if(x >= start.x && x <= end.x){
+	    				if(y >= start.y && y <= end.y){
+	    					clickedTile.x = map[i].location.x;
+	    					clickedTile.y = map[i].location.y;
+	    					break;
+	    				} else i += size.x - 1;
+	    			}
+    			}
+    			switch(currentMode){
+    				case 1:
+    					setEmpty(clickedTile);
+    					break;
+    				case 2:
+    					setBomb(clickedTile);
+    					break;
+    				case 3:
+    					setSpawner(clickedTile);
+    					break;
+    				case 4:
+    					setWall(clickedTile);
+    					break;
+    				case 5:
+    					setWater(clickedTile);
+    					break;
+    				case 6:
+    					setFreeSpace(clickedTile);
+    					break;
+    				case 7:
+    					setRandom(clickedTile);
+    					break;
+    				default:
+    					break;
+    			}
+    			drawEditor(al_get_display_width(window));
+    		}
     	}
   	}while(!isExiting);
 
@@ -254,15 +345,44 @@ void drawMenu(int displayHeight, int displayWidth){
 	al_flip_display();
 }
 
+void drawEditor(int displayWidth){
+	al_clear_to_color(al_map_rgb(255, 243, 224));
+	int horizontalGap, verticalGap;
+	Coords start, end;
+	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
+	int verticalMargin = 100;
+
+	for(int i=0; i<size.x*size.y; i++) {
+		verticalGap = gap;
+		horizontalGap = gap;
+		start.x = map[i].location.x * pixels + verticalGap + horizontalMargin;
+		start.y = map[i].location.y * pixels + horizontalGap + verticalMargin;
+		end.x = map[i].location.x * pixels + pixels + horizontalMargin;
+		end.y = map[i].location.y * pixels + pixels + verticalMargin;
+		al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
+	}
+	al_flip_display();
+}
+
 void menuLogic(){
 	if(menu[hoverElement].nextAction == "EXIT"){
 		isExiting = true;
-	}else if(menu[hoverElement].nextAction == "NEW_LOAD"){
-		templateNewLoad((hoverElement == 0 || hoverElement == 2)?(true):(false));
+	}else if(menu[hoverElement].nextAction == "NEW_LOAD_GAME"){
+		templateNewLoadGame();
+	}else if(menu[hoverElement].nextAction == "NEW_LOAD_MAP"){
+		templateNewLoadMap();	
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){
 		templateNewGame();
 	} else if(menu[hoverElement].nextAction == "NEW_MAP"){
-		//TODO EDITOR NEW MAP
+		size.x = 2;
+		size.y = 2;
+		templateNewMap();
+	} else if(menu[hoverElement].nextAction == "NEW_MAP_CREATE"){
+		bombs = 0;
+		setLevel(size.x, size.y, bombs);
+  		generateMap();
+  		openAll();
+  		isEditing = true;
 	} else if(menu[hoverElement].nextAction == "LOAD_GAME"){
 		if(!loadMap(window, "")){
 			cout << "Coudn't load the map";
@@ -277,6 +397,12 @@ void menuLogic(){
 		//TODO EDITOR LOAD MAP
 		if(!loadMap(window, "")){
 			cout << "Coudn't load the map";
+		} else { 
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			openAll();
+			isEditing = true;
 		}
 	} else if(menu[hoverElement].nextAction == "MAIN"){
 		templateMain();
@@ -359,7 +485,10 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){
 		templateNewGame();
 	} else if(menu[hoverElement].nextAction == "RESUME"){
-		isPlaying =	true;
+		if(inEdtior) {
+			isEditing = true;
+			inEdtior = false;
+		}else isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "SAVE_MAP"){
 		if(!saveMap(window)){
 			cout << "Coudn't save the map";

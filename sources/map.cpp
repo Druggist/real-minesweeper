@@ -60,29 +60,34 @@ bool generateMap(){
 }
 
 bool setBombsPos(){
-	if(bombsCount > 0 && bombsCount < sizeX * sizeY){
-		bombsPos = new short int[bombsCount];
-		for(int i = 0; i < bombsCount; i++){
-			bombsPos[i] = rand() % (sizeX * sizeY);
-			if (i > 0){
-				bool isEqual = false;
-				for(int j = 0; j < i; j++){
-					if(bombsPos[i] == bombsPos[j]){
-						i--;
-						isEqual = true;
+	if(bombsCount < sizeX * sizeY){
+		if(bombsCount > 0){
+			bombsPos = new short int[bombsCount];
+			for(int i = 0; i < bombsCount; i++){
+				bombsPos[i] = rand() % (sizeX * sizeY);
+				if (i > 0){
+					bool isEqual = false;
+					for(int j = 0; j < i; j++){
+						if(bombsPos[i] == bombsPos[j]){
+							i--;
+							isEqual = true;
+						}
+					}
+
+					if(!isEqual){
+						for(int j = 1; j <= i; j++){
+							if (bombsPos[i - j + 1] < bombsPos[i - j]){
+								int temp = bombsPos[i - j + 1];
+								bombsPos[i - j + 1] = bombsPos[i - j];
+								bombsPos[i - j] = temp;
+							}else break;
+						} 
 					}
 				}
-
-				if(!isEqual){
-					for(int j = 1; j <= i; j++){
-						if (bombsPos[i - j + 1] < bombsPos[i - j]){
-							int temp = bombsPos[i - j + 1];
-							bombsPos[i - j + 1] = bombsPos[i - j];
-							bombsPos[i - j] = temp;
-						}else break;
-					} 
-				}
 			}
+		}else{
+			bombsPos = new short int[1];
+			bombsPos[0] = -1;
 		}
 	} else return false;
 	return true;
@@ -283,7 +288,7 @@ bool loadMap(ALLEGRO_DISPLAY *display, string path){
 					break;
 				case 2:
 					map[i].type = atoi(data.c_str());
-					if(map[i].type > 8 || map[i].type < -3) return false;
+					if(map[i].type > 8 || map[i].type < -5) return false;
 					break;
 				case 3:
 					map[i].flag = atoi(data.c_str());
@@ -302,5 +307,223 @@ bool loadMap(ALLEGRO_DISPLAY *display, string path){
 void destroyMap(){
 	if(map != NULL) delete[] map;
 	if(bombsPos != NULL) delete[] bombsPos;
+	return;
+}
+
+int checkNeighbours(Coords location){
+	int count = 0;
+	Coords neighbourLocation = location;
+	if(location.x > 0){
+		neighbourLocation.x = location.x - 1;
+		if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+		if(location.y > 0){
+			neighbourLocation.y = location.y - 1;
+			if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+		}
+		if(location.y < sizeY - 1){
+			neighbourLocation.y = location.y + 1;
+			if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+		}
+	}
+	if(location.y > 0){
+		neighbourLocation.x = location.x;
+		neighbourLocation.y = location.y - 1;
+		if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+	}
+	if(location.y < sizeY - 1){
+		neighbourLocation.x = location.x;
+		neighbourLocation.y = location.y + 1;
+		if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+	}
+	if(location.x < sizeX - 1){
+		neighbourLocation.x = location.x + 1;
+		neighbourLocation.y = location.y;
+		if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+		if(location.y > 0){
+			neighbourLocation.y = location.y - 1;
+			if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+		}
+		if(location.y < sizeY - 1){
+			neighbourLocation.y = location.y + 1;
+			if(map[getTileFromLocation(neighbourLocation)].type == -1) count++;
+		}
+	}
+
+	return count;
+}
+
+//editor
+void setEmpty(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type == -1) removeBomb(location);
+		map[tileNumber].type = checkNeighbours(location);
+		map[tileNumber].flag = 1;
+		map[tileNumber].color = (map[tileNumber].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+	} 
+	return;
+}
+
+void removeBomb(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+				if(map[tileNumber].type != -1){ 
+			//left side 
+			if(location.x > 0){
+				if(map[tileNumber - 1].type > 0){
+					map[tileNumber - 1].type--;
+					map[tileNumber - 1].color = (map[tileNumber - 1].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+				}
+				if(location.y > 0 && map[tileNumber - sizeX - 1].type > 0){
+					map[tileNumber - sizeX - 1].type--;
+					map[tileNumber - sizeX - 1].color = (map[tileNumber - sizeX - 1].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+				}
+				if(location.y < sizeY - 1 && map[tileNumber + sizeX - 1].type > 0) {
+					map[tileNumber + sizeX - 1].type--;
+					map[tileNumber + sizeX - 1].color = (map[tileNumber + sizeX - 1].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+				}
+			}
+
+			//center
+			if(location.y > 0 && map[tileNumber - sizeX].type > 0) {
+				map[tileNumber - sizeX].type--;
+				map[tileNumber - sizeX].color = (map[tileNumber - sizeX].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+			}
+			if(location.y < sizeY - 1 && map[tileNumber + sizeX].type > 0){
+				map[tileNumber + sizeX].type--;
+				map[tileNumber + sizeX].color = (map[tileNumber + sizeX].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+			}
+
+			//right side
+			if(location.x < sizeX - 1){
+				if(map[tileNumber + 1].type > 0){
+					map[tileNumber + 1].type--;
+					map[tileNumber + 1].color = (map[tileNumber + 1].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+				}
+				if(location.y > 0 && map[tileNumber - sizeX + 1].type > 0){
+					map[tileNumber - sizeX + 1].type--;
+					map[tileNumber - sizeX + 1].color = (map[tileNumber - sizeX + 1].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+				}
+				if(location.y < sizeY - 1 && map[tileNumber + sizeX + 1].type > 0){
+					map[tileNumber + sizeX + 1].type--;
+					map[tileNumber + sizeX + 1].color = (map[tileNumber + sizeX + 1].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+				}
+			}
+			bombsCount--;
+			map[tileNumber].type = checkNeighbours(location);
+			map[tileNumber].flag = 1;
+			map[tileNumber].color = (map[tileNumber].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+		}
+	} 
+	return;
+}
+
+void setBomb(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type != -1){ 
+			//left side 
+			if(location.x > 0){
+				if(map[tileNumber - 1].type > -1){
+					map[tileNumber - 1].type++;
+					map[tileNumber - 1].color = al_map_rgb(255, 152, 0);
+				}
+				if(location.y > 0 && map[tileNumber - sizeX - 1].type > -1){
+					map[tileNumber - sizeX - 1].type++;
+					map[tileNumber - sizeX - 1].color = al_map_rgb(255, 152, 0);
+				}
+				if(location.y < sizeY - 1 && map[tileNumber + sizeX - 1].type > -1) {
+					map[tileNumber + sizeX - 1].type++;
+					map[tileNumber + sizeX - 1].color = al_map_rgb(255, 152, 0);
+				}
+			}
+
+			//center
+			if(location.y > 0 && map[tileNumber - sizeX].type > -1) {
+				map[tileNumber - sizeX].type++;
+				map[tileNumber - sizeX].color = al_map_rgb(255, 152, 0);
+			}
+			if(location.y < sizeY - 1 && map[tileNumber + sizeX].type > -1){
+				map[tileNumber + sizeX].type++;
+				map[tileNumber + sizeX].color = al_map_rgb(255, 152, 0);
+			}
+
+			//right side
+			if(location.x < sizeX - 1){
+				if(map[tileNumber + 1].type > -1){
+					map[tileNumber + 1].type++;
+					map[tileNumber + 1].color = al_map_rgb(255, 152, 0);
+				}
+				if(location.y > 0 && map[tileNumber - sizeX + 1].type > -1){
+					map[tileNumber - sizeX + 1].type++;
+					map[tileNumber - sizeX + 1].color = al_map_rgb(255, 152, 0);
+				}
+				if(location.y < sizeY - 1 && map[tileNumber + sizeX + 1].type > -1){
+					map[tileNumber + sizeX + 1].type++;
+					map[tileNumber + sizeX + 1].color = al_map_rgb(255, 152, 0);
+				}
+			}
+			bombsCount++;
+			map[tileNumber].type = -1;
+			map[tileNumber].flag = 1;
+			map[tileNumber].color = al_map_rgb(33, 33, 33);
+		}
+	} 
+	return;
+}
+
+void setSpawner(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type == -1) removeBomb(location);
+		setEmpty(getLocationFromTile(playerPos));
+		playerPos = tileNumber;
+		map[tileNumber].color = al_map_rgb(175, 180, 43);
+		map[tileNumber].flag = 1;
+	} 
+	return;
+}
+
+void setWall(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type == -1) removeBomb(location);
+		map[tileNumber].color = al_map_rgb(97, 97, 97);
+		map[tileNumber].flag = -1;
+		map[tileNumber].type = -2;
+	} 
+	return;
+}
+
+void setWater(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type == -1) removeBomb(location);
+		map[tileNumber].color = al_map_rgb(0, 151, 167);
+		map[tileNumber].flag = -1;
+		map[tileNumber].type = -3;
+	} 
+	return;
+}
+
+void setFreeSpace(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type == -1) removeBomb(location);
+		map[tileNumber].color = al_map_rgb(255, 224, 178);
+		map[tileNumber].flag = -1;
+		map[tileNumber].type = -4;
+	} 
+	return;
+}
+
+void setRandom(Coords location){
+	int tileNumber = getTileFromLocation(location);
+	if(tileNumber != -1){
+		if(map[tileNumber].type == -1) removeBomb(location);
+		map[tileNumber].color = al_map_rgb(93, 64, 55);
+		map[tileNumber].flag = -1;
+		map[tileNumber].type = -5;
+	} 
 	return;
 }
