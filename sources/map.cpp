@@ -218,6 +218,87 @@ void openAll(){
 	return;
 }
 
+bool saveMap(ALLEGRO_DISPLAY *display){
+	if(!al_init_native_dialog_addon()) return false;
+	ALLEGRO_FILECHOOSER *filechooser;
+	filechooser = al_create_native_file_dialog("~/new.map", "Save map.", "*.map;", ALLEGRO_FILECHOOSER_SAVE);
+	al_show_native_file_dialog(display, filechooser);
+	if(al_get_native_file_dialog_count(filechooser) > 0){
+		fstream file;
+		file.open(al_get_native_file_dialog_path(filechooser, 0), ios::out);
+		if(!file.good()) return false;
+		file <<sizeX <<" " <<sizeY <<" " <<bombsCount <<endl;
+		file <<playerPos <<endl;
+		for(int i = 0; i < sizeX * sizeY; i++){
+			short int flag = (i == playerPos)?(map[i].flag):(0);
+			file <<map[i].location.x <<" " <<map[i].location.y <<" " <<map[i].type <<" " <<flag <<endl;
+		}
+		file.close();
+	}
+	al_shutdown_native_dialog_addon();
+	return true;
+}
+
+bool loadMap(ALLEGRO_DISPLAY *display, string path){
+	if(!al_init_native_dialog_addon()) return false;
+	if(path == ""){
+		ALLEGRO_FILECHOOSER *filechooser;
+		filechooser = al_create_native_file_dialog("~/", "Load map.", "*.map;", ALLEGRO_FILECHOOSER_FILE_MUST_EXIST);
+		al_show_native_file_dialog(display, filechooser);
+		if(al_get_native_file_dialog_count(filechooser) > 0) path = al_get_native_file_dialog_path(filechooser, 0);
+		else return false;
+	}
+	fstream file;
+	file.open(path, ios::in);
+	if(!file.good()) return false;
+	destroyMap();
+	string data;
+	flaggedBombs = 0;
+	openTiles = 1;
+	getline(file, data, ' ');
+	sizeX = atoi(data.c_str());
+	if(sizeX > 100 || sizeX < 2) return false;
+	getline(file, data, ' ');
+	sizeY = atoi(data.c_str());
+	if(sizeY > 100 || sizeY < 2) return false;
+	getline(file, data);
+	bombsCount = atoi(data.c_str());
+	if(bombsCount > sizeX * sizeY - 2 || bombsCount < 1) return false;
+	getline(file, data);
+	playerPos = atoi(data.c_str());
+	if(playerPos >= sizeX * sizeY) return false;
+	map = new Tile[sizeX * sizeY];
+	for(int i = 0; i < sizeX * sizeY; i++){
+		for(int j = 0; j < 4; j++){
+			if(j == 3) getline(file, data);
+			else getline(file, data, ' ');
+			switch(j){
+				case 0:
+					map[i].location.x = atoi(data.c_str());
+					if(map[i].location.x > sizeX - 1 || map[i].location.x < 0) return false;
+					break;
+				case 1:
+					map[i].location.y = atoi(data.c_str());
+					if(map[i].location.y > sizeY - 1 || map[i].location.y < 0) return false;
+					break;
+				case 2:
+					map[i].type = atoi(data.c_str());
+					if(map[i].type > 8 || map[i].type < -3) return false;
+					break;
+				case 3:
+					map[i].flag = atoi(data.c_str());
+					if(map[i].flag > 3 || map[i].flag < -1) return false;
+					break;					
+			}
+		}
+		if(i != playerPos) map[i].color = al_map_rgb(230, 81, 0);
+		else map[i].color = al_map_rgb(175, 180, 43);
+	}
+	file.close();
+	al_shutdown_native_dialog_addon();
+	return true;
+}
+
 void destroyMap(){
 	if(map != NULL) delete[] map;
 	if(bombsPos != NULL) delete[] bombsPos;

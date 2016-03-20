@@ -8,7 +8,7 @@ Coords size;
 int bombs;
 int pixels = 50;
 int gap = 5;
-
+ALLEGRO_DISPLAY *window;
 
 int main(int argc, char **argv) {
 	srand(time(NULL));
@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
     }
 
   	al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
-    ALLEGRO_DISPLAY *window = al_create_display(640, 480);
+    window = al_create_display(640, 480);
     ALLEGRO_EVENT event;
     ALLEGRO_EVENT_QUEUE *eventQueue = al_create_event_queue();
     al_register_event_source(eventQueue, al_get_keyboard_event_source());
@@ -246,7 +246,7 @@ void drawMenu(int displayHeight, int displayWidth){
 	int padding = 20;
 	int previousWidth = 0;
 	al_draw_text(titleFont, titleColor, horizontalMargin, 50, ALLEGRO_ALIGN_CENTRE, menuTitle.c_str());
-	if(isHorizontal) horizontalMargin -= 100 * (rowElementsCount / 2);
+	if(isHorizontal) horizontalMargin -= 50 * (rowElementsCount - 1);
 	for(int i = 0; i < elementsCount; i++){
 		previousWidth = 100;
 		al_draw_text(menu[i].font, (menu[i].hover)?(menu[i].hoverColor):(menu[i].mainColor), menu[i].location.x * previousWidth + horizontalMargin, menu[i].location.y * (al_get_font_line_height(menu[i].font) + padding) + verticalMargin, ALLEGRO_ALIGN_CENTRE, menu[i].text.c_str());
@@ -264,9 +264,20 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "NEW_MAP"){
 		//TODO EDITOR NEW MAP
 	} else if(menu[hoverElement].nextAction == "LOAD_GAME"){
-		//TODO GAME LOAD MAP
+		if(!loadMap(window, "")){
+			cout << "Coudn't load the map";
+		}else{
+		size.x = sizeX;
+		size.y = sizeY;
+		bombs = bombsCount;
+		spawnPlayer(getLocationFromTile(playerPos), bombs);
+		isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "LOAD_MAP"){
 		//TODO EDITOR LOAD MAP
+		if(!loadMap(window, "")){
+			cout << "Coudn't load the map";
+		}
 	} else if(menu[hoverElement].nextAction == "MAIN"){
 		templateMain();
 	} else if(menu[hoverElement].nextAction == "ARCADE"){
@@ -299,7 +310,7 @@ void menuLogic(){
 		bombs = 20;
 		setLevel(size.x, size.y, bombs);
   		generateMap();
-  		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
+  		spawnPlayer(getLocationFromTile(playerPos), bombs);
 		isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "MEDIUM"){
 		size.x = 15;
@@ -307,7 +318,7 @@ void menuLogic(){
 		bombs = 40;
 		setLevel(size.x, size.y, bombs);
   		generateMap();
-  		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
+  		spawnPlayer(getLocationFromTile(playerPos), bombs);
 		isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "HARD"){
 		size.x = 20;
@@ -315,7 +326,7 @@ void menuLogic(){
 		bombs = 150;
 		setLevel(size.x, size.y, bombs);
   		generateMap();
-  		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
+  		spawnPlayer(getLocationFromTile(playerPos), bombs);
 		isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "CUSTOM"){
 		size.x = 2;
@@ -338,7 +349,7 @@ void menuLogic(){
 		if(size.y < 100) size.y++;
 		setText(10, to_string(size.y));		
 	} else if(menu[hoverElement].nextAction == "ADD_BOMBS"){
-		if(bombs < size.x * size.y - 2 && bombs < 1000) bombs++;
+		if(bombs < size.x * size.y - 2) bombs++;
 		setText(16, to_string(bombs));		
 	} else if(menu[hoverElement].nextAction == "START_CUSTOM"){
 		setLevel(size.x, size.y, bombs);
@@ -350,6 +361,8 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "RESUME"){
 		isPlaying =	true;
 	} else if(menu[hoverElement].nextAction == "SAVE_MAP"){
-		//TODO GAME MAP SAVING
+		if(!saveMap(window)){
+			cout << "Coudn't save the map";
+		}
 	}
 }
