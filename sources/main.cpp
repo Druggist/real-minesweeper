@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
     ALLEGRO_EVENT event;
     ALLEGRO_EVENT_QUEUE *eventQueue = al_create_event_queue();
     al_register_event_source(eventQueue, al_get_keyboard_event_source());
+    al_register_event_source(eventQueue, al_get_display_event_source(window));
     al_register_event_source(eventQueue, al_get_mouse_event_source());
     al_set_window_title( window,"Real minesweeper");
 
@@ -48,6 +49,7 @@ int main(int argc, char **argv) {
   	  	
   	templateMain();
   	drawMenu(al_get_display_height(window), al_get_display_width(window));
+    al_hide_mouse_cursor(window);
 
   	Coords nextLocation;
   	short int setFlag = 0, currentMode = 1;
@@ -56,6 +58,7 @@ int main(int argc, char **argv) {
 
   		if( event.type == ALLEGRO_EVENT_KEY_DOWN){
   			if(!isEditing){
+                al_hide_mouse_cursor(window);
 	  			//flagging & questioning
 	  			if(event.keyboard.keycode == ALLEGRO_KEY_Q){
 	  				if(isPlaying){
@@ -210,6 +213,7 @@ int main(int argc, char **argv) {
 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
 	        	if(isPlaying || isEditing){
+                    al_hide_mouse_cursor(window);
 	        		templatePause();
 	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
 	        		isPlaying = false;
@@ -219,6 +223,7 @@ int main(int argc, char **argv) {
 
 	        //editor modes
 	        if(isEditing){
+                al_show_mouse_cursor(window);
 	        	if(event.keyboard.keycode == ALLEGRO_KEY_1){
 		        	currentMode = 1;
 		        	drawEditor(al_get_display_width(window));
@@ -297,6 +302,11 @@ int main(int argc, char **argv) {
     			drawEditor(al_get_display_width(window));
     		}
     	}
+        if(event.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN){
+            if(isPlaying) drawGame(al_get_display_width(window));
+            else if(isEditing) drawEditor(al_get_display_width(window));
+            else drawMenu(al_get_display_height(window), al_get_display_width(window));
+        }
   	}while(!isExiting);
 
     al_destroy_display(window);
@@ -380,7 +390,7 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "NEW_MAP_CREATE"){
 		bombs = 0;
 		setLevel(size.x, size.y, bombs);
-  		generateMap();
+  		createMap();
   		openAll();
   		isEditing = true;
 	} else if(menu[hoverElement].nextAction == "LOAD_GAME"){

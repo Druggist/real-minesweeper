@@ -39,8 +39,8 @@ bool loadMap(ALLEGRO_DISPLAY *display, string path);
 void toggleTileFlag(Coords location, short int flag);
 void destroyMap();
 //TODO colors list & check if spawner
-void fillRandomTiles(int randomTiles, int bombsLeftsabaton);
-void createMap();
+void fillRandomTiles(int randomTiles, int bombsLeft);
+bool createMap();
 
 //editor
 int checkNeighbours(Coords location);

@@ -171,11 +171,14 @@ bool openTile(Coords location){
 }
 
 int getTileFromLocation(Coords location){
-	return location.x + sizeX * location.y;
+	int tile = location.x + sizeX * location.y;
+	return (tile < sizeX * sizeY)?(tile):(-1);
 }
 
 Coords getLocationFromTile(int tileNumber){
-	return map[tileNumber].location;
+	if(tileNumber < sizeX * sizeY && tileNumber >= 0) return map[tileNumber].location;
+	Coords location= {0, -1};
+	return location;
 }
 
 bool allTilesOpen(){
@@ -249,7 +252,7 @@ bool loadMap(ALLEGRO_DISPLAY *display, string path){
 	if(path == ""){
 		ALLEGRO_FILECHOOSER *filechooser;
 		filechooser = al_create_native_file_dialog("~/", "Load map.", "*.map;", ALLEGRO_FILECHOOSER_FILE_MUST_EXIST);
-		al_show_native_file_dialog(display, filechooser);
+		if(!al_show_native_file_dialog(display, filechooser)) return false;
 		if(al_get_native_file_dialog_count(filechooser) > 0) path = al_get_native_file_dialog_path(filechooser, 0);
 		else return false;
 	}
@@ -310,6 +313,22 @@ void destroyMap(){
 	return;
 }
 
+bool createMap(){
+	destroyMap();
+	int size = sizeX * sizeY;
+	if(size > 0){
+		map = new Tile[size];
+		for (int i = 0; i < size; i++){
+			map[i].location.x = i % sizeX;
+			map[i].location.y = i / sizeX;
+			map[i].type = -5;
+			map[i].flag = 0;
+		}
+		if(!setPlayerPos()) return false; 
+	} return false;
+	return true;
+}
+
 int checkNeighbours(Coords location){
 	int count = 0;
 	Coords neighbourLocation = location;
@@ -360,6 +379,7 @@ void setEmpty(Coords location){
 		map[tileNumber].type = checkNeighbours(location);
 		map[tileNumber].flag = 1;
 		map[tileNumber].color = (map[tileNumber].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+		setSpawner(getLocationFromTile(playerPos));
 	} 
 	return;
 }
@@ -367,7 +387,7 @@ void setEmpty(Coords location){
 void removeBomb(Coords location){
 	int tileNumber = getTileFromLocation(location);
 	if(tileNumber != -1){
-				if(map[tileNumber].type != -1){ 
+		if(map[tileNumber].type == -1){ 
 			//left side 
 			if(location.x > 0){
 				if(map[tileNumber - 1].type > 0){
@@ -412,7 +432,8 @@ void removeBomb(Coords location){
 			bombsCount--;
 			map[tileNumber].type = checkNeighbours(location);
 			map[tileNumber].flag = 1;
-			map[tileNumber].color = (map[tileNumber].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0));
+			map[tileNumber].color = (map[tileNumber].type == 0)?(al_map_rgb(255, 204, 128)):(al_map_rgb(255, 152, 0)); 
+			setSpawner(getLocationFromTile(playerPos));
 		}
 	} 
 	return;
@@ -421,7 +442,7 @@ void removeBomb(Coords location){
 void setBomb(Coords location){
 	int tileNumber = getTileFromLocation(location);
 	if(tileNumber != -1){
-		if(map[tileNumber].type != -1){ 
+		if(map[tileNumber].type != -1 && tileNumber != playerPos){ 
 			//left side 
 			if(location.x > 0){
 				if(map[tileNumber - 1].type > -1){
@@ -467,6 +488,7 @@ void setBomb(Coords location){
 			map[tileNumber].type = -1;
 			map[tileNumber].flag = 1;
 			map[tileNumber].color = al_map_rgb(33, 33, 33);
+			setSpawner(getLocationFromTile(playerPos));
 		}
 	} 
 	return;
@@ -475,18 +497,21 @@ void setBomb(Coords location){
 void setSpawner(Coords location){
 	int tileNumber = getTileFromLocation(location);
 	if(tileNumber != -1){
-		if(map[tileNumber].type == -1) removeBomb(location);
-		setEmpty(getLocationFromTile(playerPos));
-		playerPos = tileNumber;
-		map[tileNumber].color = al_map_rgb(175, 180, 43);
-		map[tileNumber].flag = 1;
+		if(tileNumber != playerPos){
+			if(map[tileNumber].type == -1) removeBomb(location);
+			int oldPlayerPos = playerPos;
+			playerPos = tileNumber;
+			setEmpty(getLocationFromTile(oldPlayerPos));
+		}
+			map[playerPos].color = al_map_rgb(175, 180, 43);
+			map[playerPos].flag = 1;
 	} 
 	return;
 }
 
 void setWall(Coords location){
 	int tileNumber = getTileFromLocation(location);
-	if(tileNumber != -1){
+	if(tileNumber != -1 && tileNumber != playerPos){
 		if(map[tileNumber].type == -1) removeBomb(location);
 		map[tileNumber].color = al_map_rgb(97, 97, 97);
 		map[tileNumber].flag = -1;
@@ -497,7 +522,7 @@ void setWall(Coords location){
 
 void setWater(Coords location){
 	int tileNumber = getTileFromLocation(location);
-	if(tileNumber != -1){
+	if(tileNumber != -1 && tileNumber != playerPos){
 		if(map[tileNumber].type == -1) removeBomb(location);
 		map[tileNumber].color = al_map_rgb(0, 151, 167);
 		map[tileNumber].flag = -1;
@@ -508,7 +533,7 @@ void setWater(Coords location){
 
 void setFreeSpace(Coords location){
 	int tileNumber = getTileFromLocation(location);
-	if(tileNumber != -1){
+	if(tileNumber != -1 && tileNumber != playerPos){
 		if(map[tileNumber].type == -1) removeBomb(location);
 		map[tileNumber].color = al_map_rgb(255, 224, 178);
 		map[tileNumber].flag = -1;
@@ -519,10 +544,10 @@ void setFreeSpace(Coords location){
 
 void setRandom(Coords location){
 	int tileNumber = getTileFromLocation(location);
-	if(tileNumber != -1){
+	if(tileNumber != -1 && tileNumber != playerPos){
 		if(map[tileNumber].type == -1) removeBomb(location);
 		map[tileNumber].color = al_map_rgb(93, 64, 55);
-		map[tileNumber].flag = -1;
+		map[tileNumber].flag = 1;
 		map[tileNumber].type = -5;
 	} 
 	return;
