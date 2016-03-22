@@ -14,3 +14,5 @@ void move(Coords nextLocation){
 	player.location = nextLocation;
 	return;
 }
+
+

@@ -3,7 +3,7 @@
 #include "../headers/map.h"
 #include "../headers/gui.h"
 
-bool isExiting = false, isPlaying = false, isEditing = false, inEdtior = false;
+bool isExiting = false, isPlaying = false, isEditing = false, inEditor = false;
 Coords size = {2, 2};
 int bombs = 1; 
 int pixels = 50;
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.x > 0) nextLocation.x--;
-			  			if(setFlag == 0) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
 			  			else toggleTileFlag(nextLocation, setFlag);
 		       			
 		       			if(!openTile(player.location)){
@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.x < size.x -1) nextLocation.x++;
-			  			if(setFlag == 0) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
 			  			else toggleTileFlag(nextLocation, setFlag);
 		       			
 		       			if(!openTile(player.location)){
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.y > 0) nextLocation.y--;
-			  			if(setFlag == 0) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
 			  			else toggleTileFlag(nextLocation, setFlag);
 		       			
 		       			if(!openTile(player.location)){
@@ -172,7 +172,7 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.y < size.y -1) nextLocation.y++;
-			  			if(setFlag == 0) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
 			  			else {
 			  				toggleTileFlag(nextLocation, setFlag);
 		       			}
@@ -213,8 +213,13 @@ int main(int argc, char **argv) {
 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
 	        	if(isPlaying || isEditing){
+	        		inEditor = false;
                     al_hide_mouse_cursor(window);
-	        		templatePause();
+	        		if(isPlaying) templatePause();
+	        		else {
+	        			inEditor = true;
+	        			templatePauseEditor();
+	        		}
 	        		drawMenu(al_get_display_height(window), al_get_display_width(window));
 	        		isPlaying = false;
 	        		isEditing = false;
@@ -391,8 +396,13 @@ void menuLogic(){
 		bombs = 0;
 		setLevel(size.x, size.y, bombs);
   		createMap();
-  		openAll();
   		isEditing = true;
+  	} else if(menu[hoverElement].nextAction == "SAVE_MAP_EDITOR"){
+  		templateBombsQuantity();
+  		setText(4, to_string(bombsCount));
+  	} else if(menu[hoverElement].nextAction == "PAUSE_EDITOR"){
+  		bombsCount = getPlacedBombsCount();
+  		templatePauseEditor();
 	} else if(menu[hoverElement].nextAction == "LOAD_GAME"){
 		if(!loadMap(window, "")){
 			cout << "Coudn't load the map";
@@ -400,6 +410,8 @@ void menuLogic(){
 		size.x = sizeX;
 		size.y = sizeY;
 		bombs = bombsCount;
+		fillRandomTiles();
+		closeAll();
 		spawnPlayer(getLocationFromTile(playerPos), bombs);
 		isPlaying = true;
 		}
@@ -412,7 +424,9 @@ void menuLogic(){
 			size.y = sizeY;
 			bombs = bombsCount;
 			openAll();
+			setEditorColors();
 			isEditing = true;
+			cout << size.x <<" "<<size.y <<" "<<bombs<<endl;
 		}
 	} else if(menu[hoverElement].nextAction == "MAIN"){
 		templateMain();
@@ -443,27 +457,36 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "EASY"){
 		size.x = 10;
 		size.y = 10;
-		bombs = 20;
+		bombs = 10;
 		setLevel(size.x, size.y, bombs);
-  		generateMap();
+  		if(!generateMap()){
+			cout << "Coudn't generate the map";
+		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-		isPlaying = true;
+		isPlaying = true;			
+		}		
 	} else if(menu[hoverElement].nextAction == "MEDIUM"){
 		size.x = 15;
 		size.y = 10;
 		bombs = 40;
 		setLevel(size.x, size.y, bombs);
-  		generateMap();
+  		if(!generateMap()){
+			cout << "Coudn't generate the map";
+		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-		isPlaying = true;
+		isPlaying = true;			
+		}		
 	} else if(menu[hoverElement].nextAction == "HARD"){
 		size.x = 20;
 		size.y = 20;
 		bombs = 150;
 		setLevel(size.x, size.y, bombs);
-  		generateMap();
+  		if(!generateMap()){
+			cout << "Coudn't generate the map";
+		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-		isPlaying = true;
+		isPlaying = true;			
+		}			
 	} else if(menu[hoverElement].nextAction == "CUSTOM"){
 		size.x = 2;
 		size.y = 2;
@@ -476,8 +499,13 @@ void menuLogic(){
 		if(size.y > 2) size.y--;	
 		setText(10, to_string(size.y));		
 	} else if(menu[hoverElement].nextAction == "SUBSTRACT_BOMBS"){
+		if(inEditor){
+			if(bombsCount > getPlacedBombsCount()) bombsCount--;
+			setText(4, to_string(bombsCount));
+		}else{
 		if(bombs > 1) bombs--;	
-		setText(16, to_string(bombs));		
+		setText(16, to_string(bombs));	
+		}	
 	} else if(menu[hoverElement].nextAction == "ADD_SIZE_X"){
 		if(size.x < 100) size.x++;	
 		setText(4, to_string(size.x));		
@@ -485,23 +513,31 @@ void menuLogic(){
 		if(size.y < 100) size.y++;
 		setText(10, to_string(size.y));		
 	} else if(menu[hoverElement].nextAction == "ADD_BOMBS"){
-		if(bombs < size.x * size.y - 2) bombs++;
-		setText(16, to_string(bombs));		
+		if(inEditor){
+			if(bombsCount < getPlacedBombsCount() + getRandomTilesCount() - 1) bombsCount++;
+			setText(4, to_string(bombsCount));
+		}else{
+			if(bombs < size.x * size.y - 2) bombs++;
+			setText(16, to_string(bombs));		
+		}
 	} else if(menu[hoverElement].nextAction == "START_CUSTOM"){
 		setLevel(size.x, size.y, bombs);
-  		generateMap();
-  		spawnPlayer(getLocationFromTile(playerPos), bombsCount);
-		isPlaying = true;						
+  		if(!generateMap()){
+			cout << "Coudn't generate the map";
+		} else {
+  		spawnPlayer(getLocationFromTile(playerPos), bombs);
+		isPlaying = true;			
+		}			
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){
 		templateNewGame();
 	} else if(menu[hoverElement].nextAction == "RESUME"){
-		if(inEdtior) {
+		if(inEditor) {
 			isEditing = true;
-			inEdtior = false;
+			inEditor = false;
 		}else isPlaying = true;
 	} else if(menu[hoverElement].nextAction == "SAVE_MAP"){
 		if(!saveMap(window)){
 			cout << "Coudn't save the map";
-		}
+		}else if(inEditor) templateMain();
 	}
 }

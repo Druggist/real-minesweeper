@@ -19,15 +19,28 @@ struct Tile {
 	ALLEGRO_COLOR color;
 };
 
+struct Colors { 
+	ALLEGRO_COLOR close;
+	ALLEGRO_COLOR flag;
+	ALLEGRO_COLOR questionMark;
+	ALLEGRO_COLOR bomb;
+	ALLEGRO_COLOR spawner;
+	ALLEGRO_COLOR freeSpace;
+	ALLEGRO_COLOR freeSpaceEditor;
+	ALLEGRO_COLOR wall;
+	ALLEGRO_COLOR water;
+	ALLEGRO_COLOR empty;
+	ALLEGRO_COLOR nearBomb;
+};
+
 extern short int sizeX, sizeY, bombsCount, flaggedBombs, openTiles;
 extern Tile *map;
 extern short int *bombsPos, playerPos;  
 
 void setLevel(int x, int y, int b);
-bool setBombsPos();
-bool setPlayerPos();
 bool openTile(Coords location); //return false if bomb explodes
 void openAll();
+void closeAll();
 int getTileFromLocation(Coords location);
 Coords getLocationFromTile(int tileNumber);
 bool allBombsFlagged();
@@ -38,16 +51,23 @@ bool saveMap(ALLEGRO_DISPLAY *display);
 bool loadMap(ALLEGRO_DISPLAY *display, string path);
 void toggleTileFlag(Coords location, short int flag);
 void destroyMap();
-//TODO colors list & check if spawner
-void fillRandomTiles(int randomTiles, int bombsLeft);
 bool createMap();
-
+int getNormalTilesCount();
+int getPlacedBombsCount();
+int getRandomTilesCount();
+Coords generateSpawnerLocation();
+bool generateBombs(int randomElements, int bombsQuantity);
+int getFirstRandomTile();
+bool fillRandomTiles();
+void setUntriggerableColors();
+bool canMove(Coords location);
 //editor
+void setEditorColors();
 int checkNeighbours(Coords location);
 void setEmpty(Coords location); //1
 void setBomb(Coords location); //2
 void removeBomb(Coords location); 
-void setSpawner(Coords location); //3
+bool setSpawner(Coords location); //3
 void setWall(Coords location); //4
 void setWater(Coords location); //5
 void setFreeSpace(Coords location); //6

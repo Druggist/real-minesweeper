@@ -257,6 +257,42 @@ void templatePause(){
 	setNextAction(2, "MAIN");
 }
 
+void templatePauseEditor(){
+	destroyMenu();
+	initMenu(3, "Pause");
+	generateMenu(false, 0);
+	setText(0, "Back to editing");
+	setNextAction(0, "RESUME");
+	setText(1, "Save map");
+	setNextAction(1, "SAVE_MAP_EDITOR");
+	setText(2, "Main menu");
+	setNextAction(2, "MAIN");
+}
+
+void templateBombsQuantity(){
+	destroyMenu();
+	initMenu(9, "Save map");
+	generateMenu(true, 3);
+	setText(0, "Bombs:");
+	setEnabled(0, false);
+	menu[0].hover = false;
+	setEnabled(1, false);
+	setEnabled(2, false);
+	setText(3, "<<");
+	setNextAction(3, "SUBSTRACT_BOMBS");
+	menu[3].hover = true;
+	hoverElement = 3;
+	setText(4, "");
+	setEnabled(4, false);
+	setText(5, ">>");
+	setNextAction(5, "ADD_BOMBS");
+	setText(6, "Back");
+	setNextAction(6, "PAUSE_EDITOR");
+	setEnabled(7, false);
+	setText(8, "Save");
+	setNextAction(8, "SAVE_MAP");
+}
+
 void templateStatus(bool win){
 	destroyMenu();
 	initMenu(2, (win)?("You win"):("You lost"));
