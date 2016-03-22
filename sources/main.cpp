@@ -435,25 +435,125 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "RETRO"){
 		templateRetro();
 	} else if(menu[hoverElement].nextAction == "1"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/1.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "2"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/2.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "3"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/3.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "4"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/4.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "5"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/5.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "6"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/6.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "7"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/7.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "8"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/8.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "9"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/9.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "10"){
-		//TODO GAME LOAD ARCADE MAP
+		if(!loadMap(window, "../resources/levels/10.map")){
+			cout << "Coudn't load the map";
+		}else{
+			size.x = sizeX;
+			size.y = sizeY;
+			bombs = bombsCount;
+			fillRandomTiles();
+			closeAll();
+			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			isPlaying = true;
+		}
 	} else if(menu[hoverElement].nextAction == "EASY"){
 		size.x = 10;
 		size.y = 10;
