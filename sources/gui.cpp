@@ -34,6 +34,7 @@ void generateMenu(bool horizontalMenu, short int elementsInRow){
 		menu[i].mainColor = al_map_rgb(230, 81, 0);
 		menu[i].hoverColor = al_map_rgb(183, 28, 28);
 		menu[i].font = al_load_font("../resources/fonts/bombing.ttf", 64, 0);
+		menu[i].smallerFont = al_load_font("../resources/fonts/bombing.ttf", 48, 0);
 		menu[i].hover = (i == 0)?(true):(false);
 		menu[i].enabled = true;
 		hoverElement = 0;

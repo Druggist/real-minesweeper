@@ -13,6 +13,7 @@ struct MenuElement{
 	ALLEGRO_COLOR mainColor;
 	ALLEGRO_COLOR hoverColor;
 	ALLEGRO_FONT *font;
+	ALLEGRO_FONT *smallerFont;
 	string text;
 	string nextAction;
 	bool hover;
