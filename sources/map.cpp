@@ -227,7 +227,7 @@ Coords getLocationFromTile(int tileNumber){
 int getNormalTilesCount(){
 	int count = 0;
 	for(int i = 0; i < sizeX * sizeY; i++){
-		if(map[i].flag >= 0) count++;
+		if(map[i].type >= 0) count++;
 	}
 	return count;
 }

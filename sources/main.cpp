@@ -355,7 +355,7 @@ void drawMenu(int displayHeight, int displayWidth){
 	if(isHorizontal) horizontalMargin -= 50 * (rowElementsCount - 1);
 	for(int i = 0; i < elementsCount; i++){
 		previousWidth = 100;
-		al_draw_text((al_get_display_height(window) < 1000)?(menu[i].smallerFont):(menu[i].font), (menu[i].hover)?(menu[i].hoverColor):(menu[i].mainColor), menu[i].location.x * previousWidth + horizontalMargin, menu[i].location.y * (al_get_font_line_height((al_get_display_height(window) < 1000)?(menu[i].smallerFont):(menu[i].font)) + padding) + verticalMargin, ALLEGRO_ALIGN_CENTRE, menu[i].text.c_str());
+		al_draw_text((al_get_display_height(window) < 900)?(menu[i].smallerFont):(menu[i].font), (menu[i].hover)?(menu[i].hoverColor):(menu[i].mainColor), menu[i].location.x * previousWidth + horizontalMargin, menu[i].location.y * (al_get_font_line_height((al_get_display_height(window) < 900)?(menu[i].smallerFont):(menu[i].font)) + padding) + verticalMargin, ALLEGRO_ALIGN_CENTRE, menu[i].text.c_str());
 	}
 	al_flip_display();
 }
