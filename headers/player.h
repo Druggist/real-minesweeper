@@ -18,6 +18,8 @@ extern Player player;
 void getInput();
 void spawnPlayer(Coords location, short int flagsEquipped);
 void move(Coords nextLocation);
-
+void putFlag();
+void takeFlag();
+bool hasFlags();
 
 #endif

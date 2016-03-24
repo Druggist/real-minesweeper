@@ -8,6 +8,8 @@ Coords size = {2, 2};
 int bombs = 1; 
 int pixels = 50;
 int gap = 5;
+double gameTime = 0.0;
+short int currentMode = 1;
 ALLEGRO_DISPLAY *window;
 
 int main(int argc, char **argv) {
@@ -36,10 +38,11 @@ int main(int argc, char **argv) {
   	al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     window = al_create_display(640, 480);
     ALLEGRO_EVENT event;
+    ALLEGRO_TIMER *timer = al_create_timer(1.0);
     ALLEGRO_EVENT_QUEUE *eventQueue = al_create_event_queue();
     al_register_event_source(eventQueue, al_get_keyboard_event_source());
-    al_register_event_source(eventQueue, al_get_display_event_source(window));
     al_register_event_source(eventQueue, al_get_mouse_event_source());
+    al_register_event_source(eventQueue, al_get_timer_event_source(timer));
     al_set_window_title( window,"Real minesweeper");
 
    	if(!window){
@@ -50,12 +53,12 @@ int main(int argc, char **argv) {
   	templateMain();
   	drawMenu(al_get_display_height(window), al_get_display_width(window));
     al_hide_mouse_cursor(window);
-
   	Coords nextLocation;
-  	short int setFlag = 0, currentMode = 1;
-  	do{
+  	short int setFlag = 0;
+  	bool draw = false;
+    al_start_timer(timer);
+  	while(!isExiting){
   		al_wait_for_event(eventQueue, &event);
-
   		if( event.type == ALLEGRO_EVENT_KEY_DOWN){
   			if(!isEditing){
                 al_hide_mouse_cursor(window);
@@ -72,7 +75,7 @@ int main(int argc, char **argv) {
 	  				if(isPlaying){
 	  					setFlag = (setFlag == 0)?(2):(0);
 	  					player.equipmentColor = (setFlag == 2)?(al_map_rgb(183, 28, 28)):(al_map_rgb(175, 180, 43));
-		       			drawGame(al_get_display_width(window));
+	  					drawGame(al_get_display_width(window));
 	  				}
 				}
 
@@ -83,27 +86,33 @@ int main(int argc, char **argv) {
 			  			
 			  			if(nextLocation.x > 0) nextLocation.x--;
 			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
-			  			else toggleTileFlag(nextLocation, setFlag);
+			  			else if(setFlag == 2) {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+			  				if( state == 1) {
+			  					if(hasFlags()) putFlag();
+			  					else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2) takeFlag();
+			  			} else toggleTileFlag(nextLocation, setFlag);
 		       			
 		       			if(!openTile(player.location)){
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
-		       			}else{
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+						}else{
 		       				drawGame(al_get_display_width(window));
 						}
 		  			}else{
 		  				navigateLeft();
-		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}
 		        } 
 
@@ -113,27 +122,33 @@ int main(int argc, char **argv) {
 			  			
 			  			if(nextLocation.x < size.x -1) nextLocation.x++;
 			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
-			  			else toggleTileFlag(nextLocation, setFlag);
+			  			else if(setFlag == 2) {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+			  				if( state == 1) {
+			  					if(hasFlags()) putFlag();
+			  					else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2) takeFlag();
+			  			} else toggleTileFlag(nextLocation, setFlag);
 		       			
 		       			if(!openTile(player.location)){
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
+	       					drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
-		       			}else{
+	      	 				drawMenu(al_get_display_height(window), al_get_display_width(window));
+	      	 			}else{
 		       				drawGame(al_get_display_width(window));
-						}
+		       			}
 		  			}else{
 		  				navigateRight();
-		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+	      	 			drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}
 		        } 
 
@@ -143,27 +158,33 @@ int main(int argc, char **argv) {
 			  			
 			  			if(nextLocation.y > 0) nextLocation.y--;
 			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
-			  			else toggleTileFlag(nextLocation, setFlag);
+			  			else if(setFlag == 2) {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+			  				if( state == 1) {
+			  					if(hasFlags()) putFlag();
+			  					else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2) takeFlag();
+			  			} else toggleTileFlag(nextLocation, setFlag);
 		       			
 		       			if(!openTile(player.location)){
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       			}else{
 		       				drawGame(al_get_display_width(window));
 						}
 		  			}else{
 		  				navigateUp();
-		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+		  				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}
 		        } 
 
@@ -173,29 +194,33 @@ int main(int argc, char **argv) {
 			  			
 			  			if(nextLocation.y < size.y -1) nextLocation.y++;
 			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
-			  			else {
-			  				toggleTileFlag(nextLocation, setFlag);
-		       			}
+			  			else if(setFlag == 2) {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+			  				if( state == 1) {
+			  					if(hasFlags()) putFlag();
+			  					else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2) takeFlag();
+			  			} else toggleTileFlag(nextLocation, setFlag);
 
 		       			if(!openTile(player.location)){
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
-		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       				isPlaying = false;
+		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		       			}else{
 		       				drawGame(al_get_display_width(window));
 						}
 		  			}else{
 		  				navigateDown();
-		        		drawMenu(al_get_display_height(window), al_get_display_width(window));
+		  				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}	        	
 		        } 
 		        //pausing & entering
@@ -307,12 +332,19 @@ int main(int argc, char **argv) {
     			drawEditor(al_get_display_width(window));
     		}
     	}
-        if(event.type == ALLEGRO_EVENT_DISPLAY_SWITCH_IN){
-            if(isPlaying) drawGame(al_get_display_width(window));
-            else if(isEditing) drawEditor(al_get_display_width(window));
-            else drawMenu(al_get_display_height(window), al_get_display_width(window));
-        }
-  	}while(!isExiting);
+
+  	if(event.type == ALLEGRO_EVENT_TIMER) {
+  		   //draw = true;
+  		   if(isPlaying) gameTime += 1.0 ;
+    }
+
+    if(draw){
+    	draw = false;
+    	if(isPlaying) drawGame(al_get_display_width(window));
+        else if(isEditing) drawEditor(al_get_display_width(window));
+        else drawMenu(al_get_display_height(window), al_get_display_width(window));
+    }
+  	}
 
     al_destroy_display(window);
     al_destroy_event_queue(eventQueue);
@@ -323,10 +355,23 @@ int main(int argc, char **argv) {
 
 void drawGame(int displayWidth){
 	al_clear_to_color(al_map_rgb(255, 243, 224));
+	templateGameGui();
+	string tempText = "Flags: " + to_string(player.flagsEquipped);
+	setText(0, tempText);
+	int minutes = gameTime / 60, seconds = gameTime - minutes;
+	string zero = (seconds < 10)?("0"):("");
+	tempText = to_string(minutes) + ":"+ zero + to_string(seconds);
+	setText(1, tempText);
 	int horizontalGap, verticalGap;
 	Coords start, end;
 	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
 	int verticalMargin = 100;
+
+		al_draw_text((al_get_display_height(window) < 900)?(menu[0].smallerFont):(menu[0].font), menu[0].mainColor, 40, menu[0].location.y * (al_get_font_line_height((al_get_display_height(window) < 900)?(menu[0].smallerFont):(menu[0].font))) + 20, ALLEGRO_ALIGN_LEFT, menu[0].text.c_str());
+
+		al_draw_text((al_get_display_height(window) < 900)?(menu[1].smallerFont):(menu[1].font), menu[1].mainColor, displayWidth / 2 , menu[1].location.y * (al_get_font_line_height((al_get_display_height(window) < 900)?(menu[1].smallerFont):(menu[1].font))) + 20, ALLEGRO_ALIGN_CENTRE, menu[1].text.c_str());
+
+		al_draw_text((al_get_display_height(window) < 900)?(menu[2].smallerFont):(menu[2].font), menu[2].mainColor, displayWidth  - 40, menu[2].location.y * (al_get_font_line_height((al_get_display_height(window) < 900)?(menu[2].smallerFont):(menu[2].font))) + 20, ALLEGRO_ALIGN_RIGHT, menu[2].text.c_str());
 
 	for(int i=0; i<size.x*size.y; i++) {
 		verticalGap = gap;
@@ -366,7 +411,35 @@ void drawEditor(int displayWidth){
 	Coords start, end;
 	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
 	int verticalMargin = 100;
+	ALLEGRO_COLOR currentColor;
+		switch(currentMode){
+    				case 1:
+    					currentColor = al_map_rgb(255, 204, 128);
+    					break;
+    				case 2:
+    					currentColor = al_map_rgb(33, 33, 33);
+    					break;
+    				case 3:
+    					currentColor = al_map_rgb(175, 180, 43);
+    					break;
+    				case 4:
+    					currentColor = al_map_rgb(97, 97, 97);
+    					break;
+    				case 5:
+    					currentColor = al_map_rgb(0, 151, 167);
+    					break;
+    				case 6:
+    					currentColor = al_map_rgb(255, 224, 178);
+    					break;
+    				case 7:
+    					currentColor = al_map_rgb(93, 64, 55);
+    					break;
+    				default:
+    					break;
+    			}
 
+		al_draw_filled_rectangle(displayWidth / 2 - 35, 20, displayWidth / 2 + 35, 90, currentColor);
+	
 	for(int i=0; i<size.x*size.y; i++) {
 		verticalGap = gap;
 		horizontalGap = gap;
@@ -413,6 +486,7 @@ void menuLogic(){
 		fillRandomTiles();
 		closeAll();
 		spawnPlayer(getLocationFromTile(playerPos), bombs);
+		gameTime = 0.0;
 		isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "LOAD_MAP"){
@@ -444,6 +518,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "2"){
@@ -456,6 +531,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "3"){
@@ -468,6 +544,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "4"){
@@ -480,6 +557,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "5"){
@@ -492,6 +570,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "6"){
@@ -504,6 +583,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "7"){
@@ -516,6 +596,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "8"){
@@ -528,6 +609,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "9"){
@@ -540,6 +622,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "10"){
@@ -552,6 +635,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			gameTime = 0.0;
 			isPlaying = true;
 		}
 	} else if(menu[hoverElement].nextAction == "EASY"){
@@ -563,6 +647,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		gameTime = 0.0;
 		isPlaying = true;			
 		}		
 	} else if(menu[hoverElement].nextAction == "MEDIUM"){
@@ -574,6 +659,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		gameTime = 0.0;
 		isPlaying = true;			
 		}		
 	} else if(menu[hoverElement].nextAction == "HARD"){
@@ -585,6 +671,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		gameTime = 0.0;
 		isPlaying = true;			
 		}			
 	} else if(menu[hoverElement].nextAction == "CUSTOM"){
@@ -626,6 +713,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		gameTime = 0.0;
 		isPlaying = true;			
 		}			
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){

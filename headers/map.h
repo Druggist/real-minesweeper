@@ -49,7 +49,7 @@ bool win();
 bool generateMap();
 bool saveMap(ALLEGRO_DISPLAY *display);
 bool loadMap(ALLEGRO_DISPLAY *display, string path);
-void toggleTileFlag(Coords location, short int flag);
+int toggleTileFlag(Coords location, short int flag);
 void destroyMap();
 bool createMap();
 int getNormalTilesCount();

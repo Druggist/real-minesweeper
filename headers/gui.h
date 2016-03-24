@@ -53,5 +53,6 @@ void templatePauseEditor();
 void templateBombsQuantity();
 void templateStatus(bool win);
 void templateCustom();
+void templateGameGui();
 
 #endif

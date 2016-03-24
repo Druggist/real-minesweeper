@@ -271,14 +271,16 @@ bool win(){
 	return false;
 }
 
-void toggleTileFlag(Coords location, short int flag){
+int toggleTileFlag(Coords location, short int flag){
 	int tileNumber = getTileFromLocation(location);
-	if(tileNumber > -1){
+	if(tileNumber > -1 && tileNumber < sizeX * sizeY){
 		if(map[tileNumber].flag != -1 && map[tileNumber].flag != 1){
 			map[tileNumber].flag = (map[tileNumber].flag != flag)?(flag):(0);
 			switch(map[tileNumber].flag){
 				case 2: 
 					map[tileNumber].color = mapColors.flag;
+					if(map[tileNumber].type == -1) flaggedBombs++;
+					return 1;
 					break;
 
 				case 3:
@@ -286,17 +288,19 @@ void toggleTileFlag(Coords location, short int flag){
 					break;
 
 				default:
+					if(map[tileNumber].type == -1 && flag == 2) flaggedBombs--;
 					map[tileNumber].color = mapColors.close;
+					return 2;
 					break;
 			}
-			if(map[tileNumber].type == -1 && flag == 2) flaggedBombs++;
 		}
 	}
-	return;
+	return 0;
 }
 
 void openAll(){
 	for(int i = 0; i < sizeX * sizeY; i++){
+		if(map[i].flag > 0) map[i].flag = 0;
 		openTile(getLocationFromTile(i));
 	}
 	return;

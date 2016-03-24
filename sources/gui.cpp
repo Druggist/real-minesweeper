@@ -381,3 +381,13 @@ void templateNewMap(){
 	setText(14, "Start");
 	setNextAction(14, "NEW_MAP_CREATE");
 }
+
+void templateGameGui(){
+	destroyMenu();
+	initMenu(3, "");
+	generateMenu(true, 3);
+	menu[0].hover = false;
+	setText(0, "Flags: 0");
+	setText(1, "0:00");
+	setText(2, "Score: 0");
+}
