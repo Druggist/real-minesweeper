@@ -10,7 +10,8 @@ int pixels = 50;
 int gap = 5;
 double gameTime = 0.0;
 short int currentMode = 1;
-ALLEGRO_DISPLAY *window;
+ALLEGRO_DISPLAY *window = NULL;
+ALLEGRO_SAMPLE *soundtrack = NULL;
 
 int main(int argc, char **argv) {
 	srand(time(NULL));
@@ -35,6 +36,28 @@ int main(int argc, char **argv) {
     	return -1;
     }
 
+    if(!al_install_audio()){
+      cout << "failed to initialize audio!\n";
+      return -1;
+   }
+
+   if(!al_init_acodec_addon()){
+      cout << "failed to initialize audio codecs!\n";
+      return -1;
+   }
+ 
+   if (!al_reserve_samples(1)){
+      cout << "failed to reserve samples!\n";
+      return -1;
+   }
+ 
+   soundtrack = al_load_sample( "../resources/sounds/background.wav" );
+ 
+   if (!soundtrack){
+      cout << "Audio clip sample not loaded!\n"; 
+      return -1;
+   }
+
   	al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
     window = al_create_display(640, 480);
     ALLEGRO_EVENT event;
@@ -52,6 +75,7 @@ int main(int argc, char **argv) {
   	  	
   	templateMain();
   	drawMenu(al_get_display_height(window), al_get_display_width(window));
+  	al_play_sample(soundtrack, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP,NULL);
     al_hide_mouse_cursor(window);
   	Coords nextLocation;
   	short int setFlag = 0;
@@ -101,12 +125,14 @@ int main(int argc, char **argv) {
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 						}else{
 		       				drawGame(al_get_display_width(window));
 						}
@@ -137,12 +163,14 @@ int main(int argc, char **argv) {
 		       				al_rest(2.0);
 		       				isPlaying = false;
 	       					drawMenu(al_get_display_height(window), al_get_display_width(window));
+	       					al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 	      	 				drawMenu(al_get_display_height(window), al_get_display_width(window));
+	      	 				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 	      	 			}else{
 		       				drawGame(al_get_display_width(window));
 		       			}
@@ -173,12 +201,14 @@ int main(int argc, char **argv) {
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 		       			}else{
 		       				drawGame(al_get_display_width(window));
 						}
@@ -209,12 +239,14 @@ int main(int argc, char **argv) {
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 		       			}else if(win()){
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
+		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 		       			}else{
 		       				drawGame(al_get_display_width(window));
 						}
@@ -238,6 +270,7 @@ int main(int argc, char **argv) {
 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
 	        	if(isPlaying || isEditing){
+  					al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
 	        		inEditor = false;
                     al_hide_mouse_cursor(window);
 	        		if(isPlaying) templatePause();
@@ -469,6 +502,7 @@ void menuLogic(){
 		bombs = 0;
 		setLevel(size.x, size.y, bombs);
   		createMap();
+  		al_stop_samples();
   		isEditing = true;
   	} else if(menu[hoverElement].nextAction == "SAVE_MAP_EDITOR"){
   		templateBombsQuantity();
@@ -500,7 +534,7 @@ void menuLogic(){
 			openAll();
 			setEditorColors();
 			isEditing = true;
-			cout << size.x <<" "<<size.y <<" "<<bombs<<endl;
+			al_stop_samples();
 		}
 	} else if(menu[hoverElement].nextAction == "MAIN"){
 		templateMain();
@@ -518,6 +552,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -531,6 +566,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -544,6 +580,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -557,6 +594,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -570,6 +608,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -583,6 +622,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -596,6 +636,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -609,6 +650,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -622,6 +664,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -635,6 +678,7 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
+			al_stop_samples();
 			gameTime = 0.0;
 			isPlaying = true;
 		}
@@ -647,6 +691,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		al_stop_samples();
   		gameTime = 0.0;
 		isPlaying = true;			
 		}		
@@ -659,6 +704,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		al_stop_samples();
   		gameTime = 0.0;
 		isPlaying = true;			
 		}		
@@ -671,6 +717,7 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		al_stop_samples();
   		gameTime = 0.0;
 		isPlaying = true;			
 		}			
@@ -713,12 +760,14 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
+  		al_stop_samples();
   		gameTime = 0.0;
 		isPlaying = true;			
 		}			
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){
 		templateNewGame();
 	} else if(menu[hoverElement].nextAction == "RESUME"){
+		al_stop_samples();
 		if(inEditor) {
 			isEditing = true;
 			inEditor = false;
