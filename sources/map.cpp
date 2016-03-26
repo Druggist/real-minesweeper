@@ -285,6 +285,7 @@ int toggleTileFlag(Coords location, short int flag){
 
 				case 3:
 					map[tileNumber].color = mapColors.questionMark;
+					return 3;
 					break;
 
 				default:
@@ -300,7 +301,7 @@ int toggleTileFlag(Coords location, short int flag){
 
 void openAll(){
 	for(int i = 0; i < sizeX * sizeY; i++){
-		if(map[i].flag > 0) map[i].flag = 0;
+		if(map[i].flag > 0 && i != playerPos) map[i].flag = 0;
 		openTile(getLocationFromTile(i));
 	}
 	return;

@@ -12,6 +12,10 @@ double gameTime = 0.0;
 short int currentMode = 1;
 ALLEGRO_DISPLAY *window = NULL;
 ALLEGRO_SAMPLE *soundtrack = NULL;
+ALLEGRO_SAMPLE *setObject = NULL;
+ALLEGRO_SAMPLE *sound = NULL;
+ALLEGRO_SAMPLE *tileSound = NULL;
+ALLEGRO_SAMPLE_ID soundtrackId, tileSoundId;
 
 int main(int argc, char **argv) {
 	srand(time(NULL));
@@ -46,12 +50,13 @@ int main(int argc, char **argv) {
       return -1;
    }
  
-   if (!al_reserve_samples(1)){
+   if (!al_reserve_samples(4)){
       cout << "failed to reserve samples!\n";
       return -1;
    }
  
    soundtrack = al_load_sample( "../resources/sounds/background.wav" );
+   setObject = al_load_sample( "../resources/sounds/set_item.wav" );
  
    if (!soundtrack){
       cout << "Audio clip sample not loaded!\n"; 
@@ -75,7 +80,7 @@ int main(int argc, char **argv) {
   	  	
   	templateMain();
   	drawMenu(al_get_display_height(window), al_get_display_width(window));
-  	al_play_sample(soundtrack, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP,NULL);
+  	al_play_sample(soundtrack, 0.5, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &soundtrackId);
     al_hide_mouse_cursor(window);
   	Coords nextLocation;
   	short int setFlag = 0;
@@ -92,6 +97,7 @@ int main(int argc, char **argv) {
 	  					setFlag = (setFlag == 0)?(3):(0);
 	  					player.equipmentColor = (setFlag == 3)?(al_map_rgb(93, 64, 55)):(al_map_rgb(175, 180, 43));
 		       			drawGame(al_get_display_width(window));
+		       			al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       		}
 	  			}
 
@@ -100,6 +106,7 @@ int main(int argc, char **argv) {
 	  					setFlag = (setFlag == 0)?(2):(0);
 	  					player.equipmentColor = (setFlag == 2)?(al_map_rgb(183, 28, 28)):(al_map_rgb(175, 180, 43));
 	  					drawGame(al_get_display_width(window));
+	  					al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 	  				}
 				}
 
@@ -109,30 +116,55 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.x > 0) nextLocation.x--;
-			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) {
+			  				move(nextLocation);
+			  				playTileSound();
+			  			}
 			  			else if(setFlag == 2) {
 			  				int state = toggleTileFlag(nextLocation, setFlag);
 			  				if( state == 1) {
-			  					if(hasFlags()) putFlag();
-			  					else toggleTileFlag(nextLocation, setFlag);
-			  				} else if(state == 2) takeFlag();
-			  			} else toggleTileFlag(nextLocation, setFlag);
+			  					if(hasFlags()){
+			  					 	putFlag();
+			  					 	sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+		        				 	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					} else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2){
+			  					sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+		        				al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					takeFlag();
+			  				} 
+			  			} else {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+				  			 if(state == 3){ 
+				  				sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} else if(state == 2) {
+				  				sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} 
+			  			}
 		       			
 		       			if(!openTile(player.location)){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/explosion.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+		       				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 		       			}else if(win()){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/win.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+		       				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 						}else{
 		       				drawGame(al_get_display_width(window));
 						}
@@ -140,6 +172,7 @@ int main(int argc, char **argv) {
 		  				navigateLeft();
 	       				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}
+		  			al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		        } 
 
 		        if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode  == ALLEGRO_KEY_RIGHT) {
@@ -147,30 +180,55 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.x < size.x -1) nextLocation.x++;
-			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) {
+			  				move(nextLocation);
+			  				playTileSound();
+			  			}
 			  			else if(setFlag == 2) {
 			  				int state = toggleTileFlag(nextLocation, setFlag);
 			  				if( state == 1) {
-			  					if(hasFlags()) putFlag();
-			  					else toggleTileFlag(nextLocation, setFlag);
-			  				} else if(state == 2) takeFlag();
-			  			} else toggleTileFlag(nextLocation, setFlag);
+			  					if(hasFlags()){
+			  					 	putFlag();
+			  					 	sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+		        				 	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					} else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2){
+			  					sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+		        				al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					takeFlag();
+			  				} 
+			  			} else {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+				  			 if(state == 3){ 
+				  				sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} else if(state == 2) {
+				  				sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} 
+			  			}
 		       			
 		       			if(!openTile(player.location)){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/explosion.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 	       					drawMenu(al_get_display_height(window), al_get_display_width(window));
-	       					al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+	       					al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 		       			}else if(win()){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/win.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 	      	 				drawMenu(al_get_display_height(window), al_get_display_width(window));
-	      	 				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+	      	 				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 	      	 			}else{
 		       				drawGame(al_get_display_width(window));
 		       			}
@@ -178,6 +236,7 @@ int main(int argc, char **argv) {
 		  				navigateRight();
 	      	 			drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}
+		  			al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		        } 
 
 		        if(event.keyboard.keycode == ALLEGRO_KEY_W || event.keyboard.keycode  == ALLEGRO_KEY_UP) {
@@ -185,30 +244,55 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.y > 0) nextLocation.y--;
-			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) {
+			  				move(nextLocation);
+			  				playTileSound();
+			  			}
 			  			else if(setFlag == 2) {
 			  				int state = toggleTileFlag(nextLocation, setFlag);
 			  				if( state == 1) {
-			  					if(hasFlags()) putFlag();
-			  					else toggleTileFlag(nextLocation, setFlag);
-			  				} else if(state == 2) takeFlag();
-			  			} else toggleTileFlag(nextLocation, setFlag);
+			  					if(hasFlags()){
+			  					 	putFlag();
+			  					 	sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+		        				 	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					} else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2){
+			  					sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+		        				al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					takeFlag();
+			  				} 
+			  			} else {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+				  			 if(state == 3){ 
+				  				sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} else if(state == 2) {
+				  				sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} 
+			  			}
 		       			
 		       			if(!openTile(player.location)){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/explosion.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+		       				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 		       			}else if(win()){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/win.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+		       				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 		       			}else{
 		       				drawGame(al_get_display_width(window));
 						}
@@ -216,6 +300,7 @@ int main(int argc, char **argv) {
 		  				navigateUp();
 		  				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}
+		  			al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		        } 
 
 		        if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode  == ALLEGRO_KEY_DOWN) {
@@ -223,30 +308,55 @@ int main(int argc, char **argv) {
 		  				nextLocation = player.location;
 			  			
 			  			if(nextLocation.y < size.y -1) nextLocation.y++;
-			  			if(setFlag == 0 && canMove(nextLocation)) move(nextLocation);
+			  			if(setFlag == 0 && canMove(nextLocation)) {
+			  				move(nextLocation);
+			  				playTileSound();
+			  			}
 			  			else if(setFlag == 2) {
 			  				int state = toggleTileFlag(nextLocation, setFlag);
 			  				if( state == 1) {
-			  					if(hasFlags()) putFlag();
-			  					else toggleTileFlag(nextLocation, setFlag);
-			  				} else if(state == 2) takeFlag();
-			  			} else toggleTileFlag(nextLocation, setFlag);
+			  					if(hasFlags()){
+			  					 	putFlag();
+			  					 	sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+		        				 	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					} else toggleTileFlag(nextLocation, setFlag);
+			  				} else if(state == 2){
+			  					sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+		        				al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+			  					takeFlag();
+			  				} 
+			  			} else {
+			  				int state = toggleTileFlag(nextLocation, setFlag);
+				  			 if(state == 3){ 
+				  				sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} else if(state == 2) {
+				  				sound = al_load_sample( "../resources/sounds/take_flag.wav" );
+			        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+				  			} 
+			  			}
 
 		       			if(!openTile(player.location)){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/explosion.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				openAll();
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(false);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+		       				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 		       			}else if(win()){
+		       				stopTileSound();
+		       				sound = al_load_sample( "../resources/sounds/win.wav" );
+		        			al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		       				drawGame(al_get_display_width(window));
 		       				templateStatus(true);
 		       				al_rest(2.0);
 		       				isPlaying = false;
 		       				drawMenu(al_get_display_height(window), al_get_display_width(window));
-		       				al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+		       				al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 		       			}else{
 		       				drawGame(al_get_display_width(window));
 						}
@@ -254,11 +364,14 @@ int main(int argc, char **argv) {
 		  				navigateDown();
 		  				drawMenu(al_get_display_height(window), al_get_display_width(window));
 		  			}	        	
+		  			al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		        } 
 		        //pausing & entering
 		        if(event.keyboard.keycode == ALLEGRO_KEY_ENTER){
 		        	if(!isPlaying){
-		        		menuLogic();
+		        		sound = al_load_sample( "../resources/sounds/set_flag.wav" );
+		        		al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+		        		menuLogic(); 
 		        		if(!isPlaying && !isEditing) drawMenu(al_get_display_height(window), al_get_display_width(window));
 		        		else{
 		        			 if(isPlaying) drawGame(al_get_display_width(window));
@@ -270,7 +383,8 @@ int main(int argc, char **argv) {
 
 	        if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
 	        	if(isPlaying || isEditing){
-  					al_play_sample(soundtrack, 1.0, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,NULL);
+	        		stopTileSound();
+  					al_play_sample(soundtrack, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 	        		inEditor = false;
                     al_hide_mouse_cursor(window);
 	        		if(isPlaying) templatePause();
@@ -333,6 +447,7 @@ int main(int argc, char **argv) {
 	    				if(y >= start.y && y <= end.y){
 	    					clickedTile.x = map[i].location.x;
 	    					clickedTile.y = map[i].location.y;
+	    					al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 	    					break;
 	    				} else i += size.x - 1;
 	    			}
@@ -502,7 +617,7 @@ void menuLogic(){
 		bombs = 0;
 		setLevel(size.x, size.y, bombs);
   		createMap();
-  		al_stop_samples();
+  		al_stop_sample(&soundtrackId);
   		isEditing = true;
   	} else if(menu[hoverElement].nextAction == "SAVE_MAP_EDITOR"){
   		templateBombsQuantity();
@@ -520,8 +635,10 @@ void menuLogic(){
 		fillRandomTiles();
 		closeAll();
 		spawnPlayer(getLocationFromTile(playerPos), bombs);
+		al_stop_sample(&soundtrackId);
 		gameTime = 0.0;
 		isPlaying = true;
+		playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "LOAD_MAP"){
 		//TODO EDITOR LOAD MAP
@@ -534,7 +651,7 @@ void menuLogic(){
 			openAll();
 			setEditorColors();
 			isEditing = true;
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 		}
 	} else if(menu[hoverElement].nextAction == "MAIN"){
 		templateMain();
@@ -552,9 +669,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "2"){
 		if(!loadMap(window, "../resources/levels/2.map")){
@@ -566,9 +684,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "3"){
 		if(!loadMap(window, "../resources/levels/3.map")){
@@ -580,9 +699,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "4"){
 		if(!loadMap(window, "../resources/levels/4.map")){
@@ -594,9 +714,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "5"){
 		if(!loadMap(window, "../resources/levels/5.map")){
@@ -608,9 +729,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "6"){
 		if(!loadMap(window, "../resources/levels/6.map")){
@@ -622,9 +744,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "7"){
 		if(!loadMap(window, "../resources/levels/7.map")){
@@ -636,9 +759,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "8"){
 		if(!loadMap(window, "../resources/levels/8.map")){
@@ -650,9 +774,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "9"){
 		if(!loadMap(window, "../resources/levels/9.map")){
@@ -664,9 +789,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "10"){
 		if(!loadMap(window, "../resources/levels/10.map")){
@@ -678,9 +804,10 @@ void menuLogic(){
 			fillRandomTiles();
 			closeAll();
 			spawnPlayer(getLocationFromTile(playerPos), bombs);
-			al_stop_samples();
+			al_stop_sample(&soundtrackId);
 			gameTime = 0.0;
 			isPlaying = true;
+			playTileSound();
 		}
 	} else if(menu[hoverElement].nextAction == "EASY"){
 		size.x = 10;
@@ -691,9 +818,10 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-  		al_stop_samples();
+  		al_stop_sample(&soundtrackId);
   		gameTime = 0.0;
-		isPlaying = true;			
+		isPlaying = true;	
+		playTileSound();		
 		}		
 	} else if(menu[hoverElement].nextAction == "MEDIUM"){
 		size.x = 15;
@@ -704,9 +832,10 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-  		al_stop_samples();
+  		al_stop_sample(&soundtrackId);
   		gameTime = 0.0;
-		isPlaying = true;			
+		isPlaying = true;	
+		playTileSound();		
 		}		
 	} else if(menu[hoverElement].nextAction == "HARD"){
 		size.x = 20;
@@ -717,9 +846,10 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-  		al_stop_samples();
+  		al_stop_sample(&soundtrackId);
   		gameTime = 0.0;
-		isPlaying = true;			
+		isPlaying = true;
+		playTileSound();			
 		}			
 	} else if(menu[hoverElement].nextAction == "CUSTOM"){
 		size.x = 2;
@@ -760,21 +890,83 @@ void menuLogic(){
 			cout << "Coudn't generate the map";
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
-  		al_stop_samples();
+  		al_stop_sample(&soundtrackId);
   		gameTime = 0.0;
-		isPlaying = true;			
+		isPlaying = true;
+		playTileSound();			
 		}			
 	} else if(menu[hoverElement].nextAction == "NEW_GAME"){
 		templateNewGame();
 	} else if(menu[hoverElement].nextAction == "RESUME"){
-		al_stop_samples();
+		al_stop_sample(&soundtrackId);
 		if(inEditor) {
 			isEditing = true;
 			inEditor = false;
-		}else isPlaying = true;
+		}else {
+			isPlaying = true;
+			playTileSound();
+		}
 	} else if(menu[hoverElement].nextAction == "SAVE_MAP"){
 		if(!saveMap(window)){
 			cout << "Coudn't save the map";
 		}else if(inEditor) templateMain();
 	}
+}
+
+void playTileSound(){
+	switch(map[getTileFromLocation(player.location)].type){
+		case 0:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/noise.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 1:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_1.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 2:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_2.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 3:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_3.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 4:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_4.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 5:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_5.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 6:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_6.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 7:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_7.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		case 8:
+			al_stop_sample(&tileSoundId);
+			sound = al_load_sample( "../resources/sounds/near_mine_8.wav" );
+		  	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &tileSoundId);
+			break;
+		default:
+			break;
+	}
+	return;
+}
+
+void stopTileSound(){
+	al_stop_sample(&tileSoundId);
+	return;
 }

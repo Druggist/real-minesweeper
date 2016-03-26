@@ -23,6 +23,7 @@ void drawGame(int displayWidth);
 void drawEditor(int displayWidth);
 void drawMenu(int displayHeight, int displayWidth);
 void menuLogic();
-
+void playTileSound();
+void stopTileSound();
 
 #endif
