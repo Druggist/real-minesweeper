@@ -5,6 +5,8 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_native_dialog.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -18,11 +20,13 @@ struct Tile {
 	short int flag; //-1 untriggerable 0 close 1 open 2 disarm/flagged/bridge 3 bridge/qustion mark
 	ALLEGRO_COLOR color;
 };
-
+ 
 struct Colors { 
 	ALLEGRO_COLOR close;
 	ALLEGRO_COLOR flag;
 	ALLEGRO_COLOR questionMark;
+	ALLEGRO_FONT *questionMarkFont;  
+	ALLEGRO_COLOR questionMarkFontColor;
 	ALLEGRO_COLOR bomb;
 	ALLEGRO_COLOR spawner;
 	ALLEGRO_COLOR freeSpace;
@@ -35,6 +39,7 @@ struct Colors {
 
 extern short int sizeX, sizeY, bombsCount, flaggedBombs, openTiles;
 extern Tile *map;
+extern Colors mapColors;
 extern short int *bombsPos, playerPos;  
 
 void setLevel(int x, int y, int b);

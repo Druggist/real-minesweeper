@@ -16,6 +16,8 @@ void setLevel(int x, int y, int b){
 	mapColors.close = al_map_rgb(230, 81, 0);
 	mapColors.flag = al_map_rgb(183, 28, 28);
 	mapColors.questionMark = al_map_rgb(93, 64, 55);
+	mapColors.questionMarkFont = al_load_font("../resources/fonts/bombing.ttf", 32, 0);
+	mapColors.questionMarkFontColor = al_map_rgb(188, 170, 164);
 	mapColors.bomb = al_map_rgb(33, 33, 33);
 	mapColors.spawner = al_map_rgb(175, 180, 43);
 	mapColors.freeSpace = al_map_rgb(255, 243, 224);

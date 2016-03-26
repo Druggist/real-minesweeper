@@ -15,7 +15,7 @@ void initMenu(int e, string t){
 	menu = new MenuElement[elementsCount];
 	menuTitle = t;
 	titleColor = al_map_rgb(255, 204, 128);
-  	titleFont = al_load_font("../resources/fonts/bombing.ttf", 120, 0);;
+  	titleFont = al_load_font("../resources/fonts/bombing.ttf", 120, 0);
 	return;
 }
 

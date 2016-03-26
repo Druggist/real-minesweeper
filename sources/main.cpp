@@ -529,6 +529,7 @@ void drawGame(int displayWidth){
 		end.x = map[i].location.x * pixels + pixels + horizontalMargin;
 		end.y = map[i].location.y * pixels + pixels + verticalMargin;
 		al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
+		if(map[i].flag == 3 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
 		if(map[i].location.x == player.location.x && map[i].location.y == player.location.y){
 			al_draw_filled_rectangle(start.x + (pixels/6), start.y + (pixels/6), end.x - (pixels/6), end.y - (pixels/6), player.color);
 			al_draw_filled_rectangle(start.x + (pixels/3), start.y + (pixels/3), end.x - (pixels/3), end.y - (pixels/3), player.equipmentColor);
@@ -596,6 +597,7 @@ void drawEditor(int displayWidth){
 		end.x = map[i].location.x * pixels + pixels + horizontalMargin;
 		end.y = map[i].location.y * pixels + pixels + verticalMargin;
 		al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
+		if(map[i].type == -5 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
 	}
 	al_flip_display();
 }
