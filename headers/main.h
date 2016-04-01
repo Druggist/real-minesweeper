@@ -12,14 +12,11 @@
 
 using namespace std;
 
-extern bool isExiting, isPlaying, isEditing, inEditor;
-extern ALLEGRO_DISPLAY *window;
-extern Coords size;
-extern int pixels, gap;
-
-void drawGame(int displayWidth);
-void drawEditor(int displayWidth);
-void drawMenu(int displayHeight, int displayWidth);
+void drawMenu();
+void drawGame();
+void drawGameGui();
+void drawEditor();
+void drawEditorGui();
 void menuLogic();
 void playTileSound();
 void stopTileSound();

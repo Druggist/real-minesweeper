@@ -81,6 +81,7 @@ bool fillRandomTiles(){
 				setEmpty(getLocationFromTile(randomTile));
 			}
 		}
+		bombsCount /= 2;
 	} else return false;
 	return true;
 }
