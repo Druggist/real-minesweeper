@@ -20,5 +20,9 @@ void drawEditorGui();
 void menuLogic();
 void playTileSound();
 void stopTileSound();
+void playerMovement(Coords nextLocation);
+void startPlaying();
+void loadGame(string map);
+void newGame();
 
 #endif
