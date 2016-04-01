@@ -6,61 +6,57 @@
 bool isExiting = false, isPlaying = false, isEditing = false, inEditor = false;
 Coords size = {2, 2};
 int bombs = 1; 
-int pixels = 50;
-int gap = 5;
+int pixels = 50, gap = 5;
 double gameTime = 0.0;
 short int currentMode = 1;
 ALLEGRO_DISPLAY *window = NULL;
-ALLEGRO_SAMPLE *soundtrack = NULL;
-ALLEGRO_SAMPLE *setObject = NULL;
-ALLEGRO_SAMPLE *sound = NULL;
-ALLEGRO_SAMPLE *tileSound = NULL;
+ALLEGRO_SAMPLE *soundtrack = NULL, *setObject = NULL, *sound = NULL, *tileSound = NULL;
 ALLEGRO_SAMPLE_ID soundtrackId, tileSoundId;
 
 int main(int argc, char **argv) {
 	srand(time(NULL));
 
     if(!al_init()){
-      cout << "failed to initialize allegro!\n";
-      return -1;   
+    	al_show_native_message_box(NULL, "Error", "Error #1", "Failed to initialize allegro!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+      	return -1;   
     }
 
     if(!al_install_keyboard()){
-    	cout << "failed to initialize keyboard!\n";
+    	al_show_native_message_box(NULL, "Error", "Error #2", "Failed to initialize keyboard!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
     	return -1;
     }
 
 	if(!al_install_mouse()){
-    	cout << "failed to initialize mouse!\n";
+    	al_show_native_message_box(NULL, "Error", "Error #3", "Failed to initialize mouse!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
     	return -1;
     }
 
     if(!al_init_primitives_addon()){
-       	cout << "failed to initialize primitives!\n";
+       	al_show_native_message_box(NULL, "Error", "Error #4", "Failed to initialize primitives!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
     	return -1;
     }
 
     if(!al_install_audio()){
-      cout << "failed to initialize audio!\n";
+      al_show_native_message_box(NULL, "Error", "Error #5", "Failed to initialize audio!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
       return -1;
    }
 
    if(!al_init_acodec_addon()){
-      cout << "failed to initialize audio codecs!\n";
+      al_show_native_message_box(NULL, "Error", "Error #6", "Failed to initialize codecs!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
       return -1;
    }
  
    if (!al_reserve_samples(4)){
-      cout << "failed to reserve samples!\n";
+      al_show_native_message_box(NULL, "Error", "Error #6", "Failed to reserve samples!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
       return -1;
    }
  
    soundtrack = al_load_sample( "../resources/sounds/background.wav" );
    setObject = al_load_sample( "../resources/sounds/set_item.wav" );
  
-   if (!soundtrack){
-      cout << "Audio clip sample not loaded!\n"; 
-      return -1;
+   if (!soundtrack || !setObject){
+   		al_show_native_message_box(NULL, "Error", "Error #7", "Failed to load sample!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
+      	return -1;
    }
 
   	al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
@@ -74,17 +70,19 @@ int main(int argc, char **argv) {
     al_set_window_title( window,"Real minesweeper");
 
    	if(!window){
-    	cout << "failed to create display!\n";
+    	al_show_native_message_box(NULL, "Error", "Error #8", "Failed to initialize display!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
     	return -1;
   	}
   	  	
   	templateMain();
-  	drawMenu(al_get_display_height(window), al_get_display_width(window));
   	al_play_sample(soundtrack, 0.5, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &soundtrackId);
     al_hide_mouse_cursor(window);
+  	drawMenu(al_get_display_height(window), al_get_display_width(window));
+  	
   	Coords nextLocation;
   	short int setFlag = 0;
   	bool draw = false;
+    
     al_start_timer(timer);
   	while(!isExiting){
   		al_wait_for_event(eventQueue, &event);
@@ -629,7 +627,7 @@ void menuLogic(){
   		templatePauseEditor();
 	} else if(menu[hoverElement].nextAction == "LOAD_GAME"){
 		if(!loadMap(window, "")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 		size.x = sizeX;
 		size.y = sizeY;
@@ -645,7 +643,7 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "LOAD_MAP"){
 		//TODO EDITOR LOAD MAP
 		if(!loadMap(window, "")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		} else { 
 			size.x = sizeX;
 			size.y = sizeY;
@@ -663,7 +661,7 @@ void menuLogic(){
 		templateRetro();
 	} else if(menu[hoverElement].nextAction == "1"){
 		if(!loadMap(window, "../resources/levels/1.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -678,7 +676,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "2"){
 		if(!loadMap(window, "../resources/levels/2.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -693,7 +691,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "3"){
 		if(!loadMap(window, "../resources/levels/3.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -708,7 +706,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "4"){
 		if(!loadMap(window, "../resources/levels/4.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -723,7 +721,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "5"){
 		if(!loadMap(window, "../resources/levels/5.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -738,7 +736,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "6"){
 		if(!loadMap(window, "../resources/levels/6.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -753,7 +751,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "7"){
 		if(!loadMap(window, "../resources/levels/7.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -768,7 +766,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "8"){
 		if(!loadMap(window, "../resources/levels/8.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -783,7 +781,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "9"){
 		if(!loadMap(window, "../resources/levels/9.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -798,7 +796,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "10"){
 		if(!loadMap(window, "../resources/levels/10.map")){
-			cout << "Coudn't load the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else{
 			size.x = sizeX;
 			size.y = sizeY;
@@ -817,7 +815,7 @@ void menuLogic(){
 		bombs = 10;
 		setLevel(size.x, size.y, bombs);
   		if(!generateMap()){
-			cout << "Coudn't generate the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
   		al_stop_sample(&soundtrackId);
@@ -831,7 +829,7 @@ void menuLogic(){
 		bombs = 40;
 		setLevel(size.x, size.y, bombs);
   		if(!generateMap()){
-			cout << "Coudn't generate the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
   		al_stop_sample(&soundtrackId);
@@ -845,7 +843,7 @@ void menuLogic(){
 		bombs = 150;
 		setLevel(size.x, size.y, bombs);
   		if(!generateMap()){
-			cout << "Coudn't generate the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
   		al_stop_sample(&soundtrackId);
@@ -889,7 +887,7 @@ void menuLogic(){
 	} else if(menu[hoverElement].nextAction == "START_CUSTOM"){
 		setLevel(size.x, size.y, bombs);
   		if(!generateMap()){
-			cout << "Coudn't generate the map";
+			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		} else {
   		spawnPlayer(getLocationFromTile(playerPos), bombs);
   		al_stop_sample(&soundtrackId);
@@ -910,7 +908,7 @@ void menuLogic(){
 		}
 	} else if(menu[hoverElement].nextAction == "SAVE_MAP"){
 		if(!saveMap(window)){
-			cout << "Coudn't save the map";
+			al_show_native_message_box(window, "Error", "Error #10", "Failed to save the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 		}else if(inEditor) templateMain();
 	}
 }

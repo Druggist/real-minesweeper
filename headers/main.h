@@ -1,21 +1,19 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <stdlib.h>
-#include <iostream> 
-#include <time.h>   
-#include <cmath>
+#include "global.h"
+#include <cstdlib>
+#include <ctime>   
 #include <string>   
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_acodec.h>
-#include "global.h"
 
 using namespace std;
 
-extern ALLEGRO_DISPLAY *window;
 extern bool isExiting, isPlaying, isEditing, inEditor;
+extern ALLEGRO_DISPLAY *window;
 extern Coords size;
 extern int pixels, gap;
 
