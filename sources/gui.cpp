@@ -296,12 +296,17 @@ void templateBombsQuantity(){
 
 void templateStatus(bool win){
 	destroyMenu();
-	initMenu(2, (win)?("You win"):("You lost"));
+	initMenu(3, (win)?("You win"):("You lost"));
 	generateMenu(false, 0);
-	setText(0, "Save map");
-	setNextAction(0, "SAVE_MAP");
-	setText(1, "Main menu");
-	setNextAction(1, "NEW_LOAD_GAME"); 
+	setText(0, "");
+	setEnabled(0, false);
+	menu[0].hover = false;
+	setText(1, "Save map");
+	menu[1].hover = true;
+	hoverElement = 1;
+	setNextAction(1, "SAVE_MAP");
+	setText(2, "Main menu");
+	setNextAction(2, "NEW_LOAD_GAME"); 
 }
 
 void templateCustom(){
@@ -389,7 +394,7 @@ void templateGameGui(){
 	menu[0].hover = false;
 	setText(0, "Flags: 0");
 	setText(1, "0:00");
-	setText(2, "Score: 0");
+	setText(2, "Bombs: 0");
 }
 
 void templateEditorGui(){

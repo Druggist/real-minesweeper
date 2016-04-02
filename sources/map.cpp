@@ -313,7 +313,7 @@ void openAll(){
 bool saveMap(ALLEGRO_DISPLAY *display){
 	if(!al_init_native_dialog_addon()) return false;
 	ALLEGRO_FILECHOOSER *filechooser;
-	filechooser = al_create_native_file_dialog("~/new.map", "Save map.", "*.map;", ALLEGRO_FILECHOOSER_SAVE);
+	filechooser = al_create_native_file_dialog("../resources/maps/new.map", "Save map.", "*.map;", ALLEGRO_FILECHOOSER_SAVE);
 	al_show_native_file_dialog(display, filechooser);
 	if(al_get_native_file_dialog_count(filechooser) > 0){
 		fstream file;
@@ -335,7 +335,7 @@ bool loadMap(ALLEGRO_DISPLAY *display, string path){
 	if(!al_init_native_dialog_addon()) return false;
 	if(path == ""){
 		ALLEGRO_FILECHOOSER *filechooser;
-		filechooser = al_create_native_file_dialog("~/", "Load map.", "*.map;", ALLEGRO_FILECHOOSER_FILE_MUST_EXIST);
+		filechooser = al_create_native_file_dialog("../resources/maps/", "Load map.", "*.map;", ALLEGRO_FILECHOOSER_FILE_MUST_EXIST);
 		if(!al_show_native_file_dialog(display, filechooser)) return false;
 		if(al_get_native_file_dialog_count(filechooser) > 0) path = al_get_native_file_dialog_path(filechooser, 0);
 		else return false;

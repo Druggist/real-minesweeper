@@ -383,6 +383,8 @@ void drawGameGui(){
 	string zero = (seconds < 10)?("0"):("");
 	tempText = to_string(minutes) + ":"+ zero + to_string(seconds);
 	setText(1, tempText);
+	tempText = "Bombs: " + to_string(bombsCount);
+	setText(2, tempText);
 
 	al_draw_filled_rectangle(0, 0, displayWidth, 100, al_map_rgb(255, 243, 224));
 	al_draw_text((small)?(menu[0].smallerFont):(menu[0].font), menu[0].mainColor, 40, menu[0].location.y * (al_get_font_line_height((small)?(menu[0].smallerFont):(menu[0].font))) + 20, ALLEGRO_ALIGN_LEFT, menu[0].text.c_str());
@@ -688,6 +690,11 @@ void playerMovement(Coords nextLocation){
 		al_rest(3.0);
 		isPlaying = false;
 		drawMenu();
+		string tempText = "Completion time: ";
+		int minutes = gameTime / 60, seconds = gameTime - (minutes * 60);
+		string zero = (seconds < 10)?("0"):("");
+		tempText += to_string(minutes) + ":"+ zero + to_string(seconds);
+		setText(0, tempText);
 		al_play_sample(soundtrack, 0.75, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 	}else drawGame();
 }
