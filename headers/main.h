@@ -24,5 +24,7 @@ void playerMovement(Coords nextLocation);
 void startPlaying();
 void loadGame(string map);
 void newGame();
+void explosion();
+void crown();
 
 #endif

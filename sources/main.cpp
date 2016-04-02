@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
 	  	return -1;
 	}
  
-   soundtrack = al_load_sample( "../resources/sounds/background.wav" );
-   setObject = al_load_sample( "../resources/sounds/set_item.wav" );
+   	soundtrack = al_load_sample( "../resources/sounds/background.wav" );
+   	setObject = al_load_sample( "../resources/sounds/set_item.wav" );
  
    	if (!soundtrack || !setObject){
 		al_show_native_message_box(NULL, "Error", "Error #7", "Failed to load sample!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
 	}
 		
 	templateMain();
-	al_play_sample(soundtrack, 0.5, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &soundtrackId);
+	al_play_sample(soundtrack, 0.75, 0.0,1.0,ALLEGRO_PLAYMODE_LOOP, &soundtrackId);
 	al_hide_mouse_cursor(window);
 	drawMenu();
 	
@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
 						setFlag = (setFlag == 0)?(3):(0);
 						player.equipmentColor = (setFlag == 3)?(al_map_rgb(93, 64, 55)):(al_map_rgb(175, 180, 43));
 						drawGame();
-						al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+						al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 					}
 				}
 
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 						setFlag = (setFlag == 0)?(2):(0);
 						player.equipmentColor = (setFlag == 2)?(al_map_rgb(183, 28, 28)):(al_map_rgb(175, 180, 43));
 						drawGame();
-						al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+						al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 					}
 				}
 
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 						navigateLeft();
 						drawMenu();
 					}
-					al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+					al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 				} 
 
 				if(event.keyboard.keycode == ALLEGRO_KEY_D || event.keyboard.keycode  == ALLEGRO_KEY_RIGHT) {
@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 						navigateRight();
 						drawMenu();
 					}
-					al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+					al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 				} 
 
 				if(event.keyboard.keycode == ALLEGRO_KEY_W || event.keyboard.keycode  == ALLEGRO_KEY_UP) {
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 						navigateUp();
 						drawMenu();
 					}
-					al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+					al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 				} 
 
 				if(event.keyboard.keycode == ALLEGRO_KEY_S || event.keyboard.keycode  == ALLEGRO_KEY_DOWN) {
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
 						navigateDown();
 						drawMenu();
 					}	        	
-					al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+					al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 				} 
 				//pausing & entering
 				if(event.keyboard.keycode == ALLEGRO_KEY_ENTER){
@@ -174,7 +174,7 @@ int main(int argc, char **argv) {
 			if(event.keyboard.keycode == ALLEGRO_KEY_ESCAPE){
 				if(isPlaying || isEditing){
 					stopTileSound();
-					al_play_sample(soundtrack, 0.5, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
+					al_play_sample(soundtrack, 0.75, 0.0, 1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 					inEditorMenu = false;
 					al_hide_mouse_cursor(window);
 					if(isPlaying) templatePause();
@@ -239,7 +239,7 @@ int main(int argc, char **argv) {
 						if(y >= start.y && y <= end.y){
 							clickedTile.x = map[i].location.x;
 							clickedTile.y = map[i].location.y;
-							al_play_sample(setObject, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+							al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 							break;
 						} else i += size.x - 1;
 					}
@@ -343,7 +343,7 @@ void drawGame(){
 void drawGameGui(){
 	int displayWidth = al_get_display_width(window);
 	bool small = (displayWidth < 900)?(true):(false);
-	string tempText = "Flags: " + to_string(player.flagsEquipped) + " " + to_string(flaggedBombs) + " " + to_string(bombsCount);
+	string tempText = "Flags: " + to_string(player.flagsEquipped);
 	setText(0, tempText);
 	int minutes = gameTime / 60, seconds = gameTime - (minutes * 60);
 	string zero = (seconds < 10)?("0"):("");
@@ -630,26 +630,22 @@ void playerMovement(Coords nextLocation){
 	}
 						
 	if(!openTile(player.location)){
-		stopTileSound();
-		sound = al_load_sample( "../resources/sounds/explosion.wav" );
-		al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
-		openAll();
 		drawGame();
+		explosion();
 		templateStatus(false);
 		al_rest(2.0);
 		isPlaying = false;
 		drawMenu();
-		al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
+		al_play_sample(soundtrack, 0.75, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 	}else if(win()){
-		stopTileSound();
-		sound = al_load_sample( "../resources/sounds/win.wav" );
-		al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
 		drawGame();
+		al_rest(0.5);
+		crown();
 		templateStatus(true);
-		al_rest(2.0);
+		al_rest(3.0);
 		isPlaying = false;
 		drawMenu();
-		al_play_sample(soundtrack, 0.5, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
+		al_play_sample(soundtrack, 0.75, 0.0,1.0, ALLEGRO_PLAYMODE_LOOP ,&soundtrackId);
 	}else drawGame();
 }
 
@@ -680,4 +676,134 @@ void newGame(){
 	if(!generateMap()) al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
 	else startPlaying();
 
+}
+
+void explosion(){
+	Coords start, end;
+	Coords initialLocation = player.location;
+	int displayWidth = al_get_display_width(window);
+	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
+	int verticalMargin = 100;
+
+	stopTileSound();
+	sound = al_load_sample( "../resources/sounds/explosion.wav" );
+	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+	ALLEGRO_COLOR smokeColor, smokeBorderColor;
+
+	for(int i = 0; i < 60; i++){
+
+		switch(i){
+			case 0:
+				smokeColor = al_map_rgb(255, 61, 0);
+				smokeBorderColor = al_map_rgb(0, 0, 0);
+				break;
+			case 5:
+				smokeColor = al_map_rgb(33, 33, 33);
+				break;
+			case 15:
+				smokeColor = al_map_rgb(66, 66, 66);
+				break;
+			case 25:
+				smokeColor = al_map_rgb(97, 97, 97);
+				break;
+			case 40:
+				smokeColor = al_map_rgb(189, 189, 189);
+				break;
+			case 58:
+				smokeColor = al_map_rgb(224, 224, 224);
+				break;
+			default:
+				break;
+		}
+
+		int randomX = rand() % (pixels) + 5 * i;
+		int randomY = (rand() % (pixels) + 3 * i) * (rand() % 2 * -1);
+		int smokeSize = rand() % pixels + 20;
+
+		start.x = initialLocation.x * pixels + horizontalMargin + randomX;
+		start.y = initialLocation.y * pixels + verticalMargin + randomY;
+		end.x = initialLocation.x * pixels + smokeSize + horizontalMargin + randomX;
+		end.y = initialLocation.y * pixels + smokeSize + verticalMargin + randomY;
+		if(start.y > 100 && end.y > 100){
+			al_draw_filled_rectangle(start.x, start.y, end.x, end.y, smokeColor);
+			al_draw_rectangle(start.x, start.y, end.x, end.y, smokeBorderColor, 2);
+		}
+
+		randomX *= -1;
+		randomY = (rand()% (pixels) + 3 * i) * (rand() % 2 * -1);
+		smokeSize = rand() % pixels + 10;
+
+		start.x = initialLocation.x * pixels + horizontalMargin + randomX;
+		start.y = initialLocation.y * pixels + verticalMargin + randomY;
+		end.x = initialLocation.x * pixels + smokeSize + horizontalMargin + randomX;
+		end.y = initialLocation.y * pixels + smokeSize + verticalMargin + randomY;
+		if(start.y > 100 && end.y > 100){
+			al_draw_filled_rectangle(start.x, start.y, end.x, end.y, smokeColor);
+			al_draw_rectangle(start.x, start.y, end.x, end.y, smokeBorderColor, 2);
+		}
+
+		randomX = (rand()% (pixels) + 3 * i) * (rand() % 2 * -1);
+		randomY = rand()% (pixels) + 5 * i;
+		smokeSize = rand() % pixels + 10;
+
+		start.x = initialLocation.x * pixels + horizontalMargin + randomX;
+		start.y = initialLocation.y * pixels + verticalMargin + randomY;
+		end.x = initialLocation.x * pixels + smokeSize + horizontalMargin + randomX;
+		end.y = initialLocation.y * pixels + smokeSize + verticalMargin + randomY;
+		if(start.y > 100 && end.y > 100){
+			al_draw_filled_rectangle(start.x, start.y, end.x, end.y, smokeColor);
+			al_draw_rectangle(start.x, start.y, end.x, end.y, smokeBorderColor, 2);
+		}
+
+		randomX = (rand()% (pixels) + 3 * i)* (rand() % 2 * -1);
+		randomY *= -1;
+		smokeSize = rand() % pixels + 10;
+
+		start.x = initialLocation.x * pixels + horizontalMargin + randomX;
+		start.y = initialLocation.y * pixels + verticalMargin + randomY;
+		end.x = initialLocation.x * pixels + smokeSize + horizontalMargin + randomX;
+		end.y = initialLocation.y * pixels + smokeSize + verticalMargin + randomY;
+		if(start.y > 100 && end.y > 100){
+			al_draw_filled_rectangle(start.x, start.y, end.x, end.y, smokeColor);
+			al_draw_rectangle(start.x, start.y, end.x, end.y, smokeBorderColor, 2);
+		}
+		al_flip_display();
+		sleep(0.1);
+	}
+}
+
+void crown(){
+	stopTileSound();
+	sound = al_load_sample( "../resources/sounds/win.wav" );
+	al_play_sample(sound, 1.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
+
+	int displayWidth = al_get_display_width(window);
+	int displayHeight = al_get_display_height(window);
+	Coords start, end;
+
+	start.x = displayWidth / 2 - 300;
+	start.y = displayHeight / 2 - 250;
+	end.x = displayWidth / 2 + 300;
+	end.y = displayHeight / 2 + 150;
+
+	al_draw_filled_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(255, 229, 127));
+	al_draw_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(253, 216, 53), 10);
+
+	al_draw_filled_triangle(start.x + 50, end.y - 50, displayWidth / 2, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(253, 216, 53));
+	al_draw_filled_triangle(start.x + 50, end.y - 50, start.x + 50, start.y + 50, displayWidth / 2, end.y - 50, al_map_rgb(251, 192, 45));
+	al_draw_filled_triangle(displayWidth / 2, end.y - 50, end.x - 50, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(249, 168, 37));
+	for(int i = 0; i < 3; i++){
+	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(240, 98, 146));
+	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(240, 98, 146));
+	al_draw_filled_circle(start.x + 100, end.y - 100, 15, al_map_rgb(236, 64, 122));
+	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(236, 64, 122));
+	al_flip_display();
+	al_rest(0.1);
+	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(186, 104, 200));
+	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(186, 104, 200));
+	al_draw_filled_circle(start.x + 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
+	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
+	al_flip_display();
+	al_rest(0.25);
+	}
 }
