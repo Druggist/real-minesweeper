@@ -7,6 +7,8 @@ bool isExiting = false, isPlaying = false, isEditing = false, inEditorMenu = fal
 Coords size = {2, 2};
 int bombs = 1, previousType = -1; 
 int pixels = 50, gap = 5;
+int verticalScroll = 0, horizontalScroll = 0;
+bool scrollDirection = true;
 double gameTime = 0.0;
 short int currentMode = 1, setFlag = 0;
 ALLEGRO_DISPLAY *window = NULL;
@@ -81,7 +83,7 @@ int main(int argc, char **argv) {
 	
 	Coords nextLocation;
 	bool draw = false;
-	
+	int lastScrollPos = 0;
 	al_start_timer(timer);
 	while(!isExiting){
 		al_wait_for_event(eventQueue, &event);
@@ -224,59 +226,88 @@ int main(int argc, char **argv) {
 
 		if( event.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN){
 			if(isEditing){
-				Coords clickedTile, start, end;
-				int horizontalMargin = (al_get_display_width(window) > size.x * pixels + (size.x - 1) * gap)?((al_get_display_width(window) - (size.x * pixels + (size.x - 1) * gap))/2):(0);
-				int x = event.mouse.x; 
-				int y = event.mouse.y;
-				
-				for(int i = 0; i < size.x * size.y; i++){
-					start.x = map[i].location.x * pixels + gap + horizontalMargin;
-					start.y = map[i].location.y * pixels + gap + 100;
-					end.x = map[i].location.x * pixels + pixels + horizontalMargin;
-					end.y = map[i].location.y * pixels + pixels + 100;
+				if(event.mouse.button == 1){
+					Coords clickedTile, start, end;
+					int horizontalMargin = (al_get_display_width(window) > size.x * pixels + (size.x - 1) * gap)?((al_get_display_width(window) - (size.x * pixels + (size.x - 1) * gap))/2):(0);
+					int x = event.mouse.x; 
+					int y = event.mouse.y;
 					
-					if(x >= start.x && x <= end.x){
-						if(y >= start.y && y <= end.y){
-							clickedTile.x = map[i].location.x;
-							clickedTile.y = map[i].location.y;
-							al_play_sample(setObject, 2.0, 0.0,1.0,ALLEGRO_PLAYMODE_ONCE,NULL);
-							break;
-						} else i += size.x - 1;
+					for(int i = 0; i < size.x * size.y; i++){
+						start.x = (map[i].location.x - horizontalScroll) * pixels + gap + horizontalMargin;
+						start.y = (map[i].location.y - verticalScroll) * pixels + gap + 100;
+						end.x = (map[i].location.x - horizontalScroll) * pixels + pixels + horizontalMargin;
+						end.y = (map[i].location.y - verticalScroll) * pixels + pixels + 100;
+						
+						if(x >= start.x && x <= end.x){
+							if(y >= start.y && y <= end.y){
+								clickedTile.x = map[i].location.x;
+								clickedTile.y = map[i].location.y;
+								al_play_sample(setObject, 2.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+								break;
+							} else i += size.x - 1;
+						}
 					}
+					
+					switch(currentMode){
+						case 1:
+							setEmpty(clickedTile);
+							break;
+						case 2:
+							setBomb(clickedTile);
+							break;
+						case 3:
+							setSpawner(clickedTile);
+							break;
+						case 4:
+							setWall(clickedTile);
+							break;
+						case 5:
+							setWater(clickedTile);
+							break;
+						case 6:
+							setFreeSpace(clickedTile);
+							break;
+						case 7:
+							setRandom(clickedTile);
+							break;
+						default:
+							break;
+					}
+					drawEditor();
+				}else if(event.mouse.button == 2){
+					scrollDirection = !scrollDirection;
+					setText(0, (scrollDirection)?("Vertical"):("Horizontal"));
+					drawEditorGui();
 				}
-				
-				switch(currentMode){
-					case 1:
-						setEmpty(clickedTile);
-						break;
-					case 2:
-						setBomb(clickedTile);
-						break;
-					case 3:
-						setSpawner(clickedTile);
-						break;
-					case 4:
-						setWall(clickedTile);
-						break;
-					case 5:
-						setWater(clickedTile);
-						break;
-					case 6:
-						setFreeSpace(clickedTile);
-						break;
-					case 7:
-						setRandom(clickedTile);
-						break;
-					default:
-						break;
-				}
-				drawEditor();
 			}
 		}
 
 		if(event.type == ALLEGRO_EVENT_TIMER) {
 			draw = true;
 			if(isPlaying) gameTime += 1.0 ;
+		}
+
+		if(event.type == ALLEGRO_EVENT_MOUSE_AXES){
+			if(isEditing){
+				if(scrollDirection){
+					if(event.mouse.z > lastScrollPos){
+					 	scroll(1);
+					 	drawEditor();
+					 } else if(event.mouse.z < lastScrollPos){ 
+					 	scroll(2);
+					 	drawEditor();
+					 }	
+				}else{
+					if(event.mouse.z > lastScrollPos){
+						scroll(3);
+						drawEditor();	
+					} else if(event.mouse.z < lastScrollPos){
+						scroll(4);	
+						drawEditor();
+					}
+				}
+				lastScrollPos = event.mouse.z;
+			}
 		}
 
 		if(draw){
@@ -325,16 +356,19 @@ void drawGame(){
 	for(int i=0; i<size.x*size.y; i++) {
 		verticalGap = gap;
 		horizontalGap = gap;
-		start.x = map[i].location.x * pixels + verticalGap + horizontalMargin;
-		start.y = map[i].location.y * pixels + horizontalGap + verticalMargin;
-		end.x = map[i].location.x * pixels + pixels + horizontalMargin;
-		end.y = map[i].location.y * pixels + pixels + verticalMargin;
 
-		al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
-		if(map[i].flag == 3 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
-		if(map[i].location.x == player.location.x && map[i].location.y == player.location.y){
-			al_draw_filled_rectangle(start.x + (pixels/6), start.y + (pixels/6), end.x - (pixels/6), end.y - (pixels/6), player.color);
-			al_draw_filled_rectangle(start.x + (pixels/3), start.y + (pixels/3), end.x - (pixels/3), end.y - (pixels/3), player.equipmentColor);
+		if(map[i].location.y >= verticalScroll && map[i].location.x >= horizontalScroll){
+			start.x = (map[i].location.x - horizontalScroll) * pixels + verticalGap + horizontalMargin;
+			start.y = (map[i].location.y - verticalScroll) * pixels + horizontalGap + verticalMargin;
+			end.x = (map[i].location.x - horizontalScroll) * pixels + pixels + horizontalMargin;
+			end.y = (map[i].location.y - verticalScroll) * pixels + pixels + verticalMargin;
+			
+			al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
+			if(map[i].flag == 3 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
+			if(map[i].location.x == player.location.x && map[i].location.y == player.location.y){
+				al_draw_filled_rectangle(start.x + (pixels/6), start.y + (pixels/6), end.x - (pixels/6), end.y - (pixels/6), player.color);
+				al_draw_filled_rectangle(start.x + (pixels/3), start.y + (pixels/3), end.x - (pixels/3), end.y - (pixels/3), player.equipmentColor);
+			}
 		}
 	}
 	drawGameGui();
@@ -372,13 +406,16 @@ void drawEditor(){
 	for(int i=0; i<size.x*size.y; i++) {
 		verticalGap = gap;
 		horizontalGap = gap;
-		start.x = map[i].location.x * pixels + verticalGap + horizontalMargin;
-		start.y = map[i].location.y * pixels + horizontalGap + verticalMargin;
-		end.x = map[i].location.x * pixels + pixels + horizontalMargin;
-		end.y = map[i].location.y * pixels + pixels + verticalMargin;
-
-		al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
-		if(map[i].type == -5 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
+		
+		if(map[i].location.y >= verticalScroll && map[i].location.x >= horizontalScroll){
+			start.x = (map[i].location.x - horizontalScroll) * pixels + verticalGap + horizontalMargin;
+			start.y = (map[i].location.y - verticalScroll) * pixels + horizontalGap + verticalMargin;
+			end.x = (map[i].location.x - horizontalScroll) * pixels + pixels + horizontalMargin;
+			end.y = (map[i].location.y - verticalScroll) * pixels + pixels + verticalMargin;
+			
+			al_draw_filled_rectangle(start.x, start.y, end.x, end.y, map[i].color);
+			if(map[i].type == -5 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
+		}
 	}
 	drawEditorGui();
 }
@@ -386,6 +423,7 @@ void drawEditor(){
 void drawEditorGui(){
 	ALLEGRO_COLOR currentColor;
 	int displayWidth = al_get_display_width(window);
+	bool small = (displayWidth < 900)?(true):(false);	
 
 	switch(currentMode){
 		case 1:
@@ -412,9 +450,10 @@ void drawEditorGui(){
 		default:
 			break;
 	}
-
+	al_draw_filled_rectangle(0, 0, displayWidth, 100, al_map_rgb(255, 243, 224));
 	al_draw_filled_rectangle(displayWidth / 2 - 35, 20, displayWidth / 2 + 35, 90, currentColor);
 	if(currentMode == 7) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,displayWidth / 2, 35 + 6, ALLEGRO_ALIGN_CENTRE, "?");
+	al_draw_text((small)?(menu[0].smallerFont):(menu[0].font), menu[0].mainColor, 40, menu[0].location.y * (al_get_font_line_height((small)?(menu[0].smallerFont):(menu[0].font))) + 20, ALLEGRO_ALIGN_LEFT, menu[0].text.c_str());
 	al_flip_display();
 }
 
@@ -439,6 +478,8 @@ void menuLogic(){
 		createMap();
 		al_stop_sample(&soundtrackId);
 		isEditing = true;
+		resetScroll();
+		templateEditorGui();
 	} else if(nextAction == "SAVE_MAP_EDITOR"){
 		templateBombsQuantity();
 		setText(4, to_string(bombsCount));
@@ -448,16 +489,16 @@ void menuLogic(){
 	} else if(nextAction == "LOAD_GAME"){
 		loadGame("");
 	} else if(nextAction == "LOAD_MAP"){
-		if(!loadMap(window, "")){
-			al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
-		} else { 
+		if(loadMap(window, "")){
 			size.x = sizeX;
 			size.y = sizeY;
 			bombs = bombsCount;
 			openAll();
 			setEditorColors();
 			isEditing = true;
+			resetScroll();
 			al_stop_sample(&soundtrackId);
+			templateEditorGui();
 		}
 	} else if(nextAction == "MAIN"){
 		templateMain();
@@ -498,7 +539,7 @@ void menuLogic(){
 	} else if(nextAction == "HARD"){
 		size.x = 20;
 		size.y = 20;
-		bombs = 150;
+		bombs = 50;
 		newGame();
 		playTileSound();		
 	} else if(nextAction == "CUSTOM"){
@@ -543,6 +584,7 @@ void menuLogic(){
 		if(inEditorMenu) {
 			isEditing = true;
 			inEditorMenu = false;
+			templateEditorGui();
 		} else {
 			isPlaying = true;
 			templateGameGui();
@@ -605,6 +647,7 @@ void playerMovement(Coords nextLocation){
 	if(setFlag == 0 && canMove(nextLocation)) {
 		move(nextLocation);
 		playTileSound();
+		scroll(0);
 	} else if(setFlag == 2) {
 		int state = toggleTileFlag(nextLocation, setFlag);
 		if(state == 1) {
@@ -654,14 +697,13 @@ void startPlaying(){
 	al_stop_sample(&soundtrackId);
 	gameTime = 0.0;
 	isPlaying = true;
+	setScroll();
 	templateGameGui();
 	playTileSound();
 }
 
 void loadGame(string map){
-	if(!loadMap(window, map)){
-		al_show_native_message_box(window, "Error", "Error #9", "Failed to load the map!", NULL, ALLEGRO_MESSAGEBOX_ERROR);
-	}else{
+	if(loadMap(window, map)){
 		size.x = sizeX;
 		size.y = sizeY;
 		bombs = bombsCount;
@@ -681,6 +723,8 @@ void newGame(){
 void explosion(){
 	Coords start, end;
 	Coords initialLocation = player.location;
+	initialLocation.x -= horizontalScroll;
+	initialLocation.y -= verticalScroll;
 	int displayWidth = al_get_display_width(window);
 	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
 	int verticalMargin = 100;
@@ -768,7 +812,6 @@ void explosion(){
 			al_draw_rectangle(start.x, start.y, end.x, end.y, smokeBorderColor, 2);
 		}
 		al_flip_display();
-		sleep(0.1);
 	}
 }
 
@@ -792,6 +835,8 @@ void crown(){
 	al_draw_filled_triangle(start.x + 50, end.y - 50, displayWidth / 2, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(253, 216, 53));
 	al_draw_filled_triangle(start.x + 50, end.y - 50, start.x + 50, start.y + 50, displayWidth / 2, end.y - 50, al_map_rgb(251, 192, 45));
 	al_draw_filled_triangle(displayWidth / 2, end.y - 50, end.x - 50, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(249, 168, 37));
+	al_flip_display();
+
 	for(int i = 0; i < 3; i++){
 	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(240, 98, 146));
 	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(240, 98, 146));
@@ -805,5 +850,38 @@ void crown(){
 	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
 	al_flip_display();
 	al_rest(0.25);
+	}
+}
+
+void scroll(int scrollFlag){
+	if(isPlaying){
+		//scroll up
+		if((player.location.y - verticalScroll) * pixels + pixels <= pixels + gap  + pixels / 2 && size.y * (pixels + gap) > al_get_display_height(window) - 100 && player.location.y > 0) verticalScroll--;
+		//scroll down
+		if(al_get_display_height(window) - pixels - ((player.location.y - verticalScroll) * pixels + pixels) <= pixels + gap + pixels / 2 && size.y * (pixels + gap) > al_get_display_height(window) - 100 && player.location.y < size.y - 1) verticalScroll++;
+		//scroll left
+		if(((player.location.x - horizontalScroll) * pixels + pixels) <= pixels + gap  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x > 0) horizontalScroll--;
+		//scroll right
+		if(al_get_display_width(window) - ((player.location.x - horizontalScroll) * pixels + pixels) <= pixels + gap  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x < size.x - 1) horizontalScroll++;
+	}else if(isEditing){
+		int tilesOnScreenVertical = (al_get_display_height(window) - 100) / (pixels + gap);
+		int tilesOnScreenHorizontal = al_get_display_width(window) / (pixels + gap);
+		if(scrollFlag == 1 && verticalScroll > 0 && size.y * (pixels + gap) > al_get_display_height(window) - 100) verticalScroll--;
+		if(scrollFlag == 2 && verticalScroll < size.y - tilesOnScreenVertical && size.y * (pixels + gap) > al_get_display_height(window) - 100) verticalScroll++;
+		if(scrollFlag == 3 && horizontalScroll > 0 && size.x * (pixels + gap) > al_get_display_width(window)) horizontalScroll--;
+		if(scrollFlag == 4 && horizontalScroll < size.x - tilesOnScreenHorizontal && size.x * (pixels + gap) > al_get_display_width(window)) horizontalScroll++;
+	}
+}
+
+void resetScroll(){
+	verticalScroll = 0;
+	horizontalScroll = 0;
+	scrollDirection = true;
+}
+
+void setScroll(){
+	resetScroll();
+	for(int i = 0; i < size.x * size.y; i++){
+		scroll(0);
 	}
 }

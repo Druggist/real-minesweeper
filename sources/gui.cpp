@@ -391,3 +391,12 @@ void templateGameGui(){
 	setText(1, "0:00");
 	setText(2, "Score: 0");
 }
+
+void templateEditorGui(){
+	destroyMenu();
+	initMenu(1, "");
+	generateMenu(true, 1);
+	menu[0].hover = false;
+	setText(0, "Vertical");
+}
+

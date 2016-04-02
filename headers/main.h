@@ -26,5 +26,8 @@ void loadGame(string map);
 void newGame();
 void explosion();
 void crown();
+void scroll(int scrollFlag);
+void resetScroll();
+void setScroll();
 
 #endif
