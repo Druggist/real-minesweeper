@@ -1,6 +1,6 @@
 #include "../headers/map.h"
 
-short int sizeX, sizeY, bombsCount, flaggedBombs, openTiles;
+short int sizeX, sizeY, bombsCount, bombsCountEditor, flaggedBombs, openTiles;
 int displayWidth;
 Tile *map;
 Colors mapColors;
@@ -10,6 +10,7 @@ void setLevel(int x, int y, int b){
 	sizeX = x;
 	sizeY = y;
 	bombsCount = b;
+	bombsCountEditor = b;
 	flaggedBombs = 0;
 	openTiles = 1;
 
@@ -81,7 +82,6 @@ bool fillRandomTiles(){
 				setEmpty(getLocationFromTile(randomTile));
 			}
 		}
-		bombsCount /= 2;
 	} else return false;
 	return true;
 }
@@ -319,7 +319,7 @@ bool saveMap(ALLEGRO_DISPLAY *display){
 		fstream file;
 		file.open(al_get_native_file_dialog_path(filechooser, 0), ios::out);
 		if(!file.good()) return false;
-		file <<sizeX <<" " <<sizeY <<" " <<bombsCount <<endl;
+		file <<sizeX <<" " <<sizeY <<" " <<bombsCount + bombsCountEditor <<endl;
 		file <<playerPos <<endl;
 		for(int i = 0; i < sizeX * sizeY; i++){
 			short int flag = (i == playerPos)?(map[i].flag):((map[i].flag == -1)?(-1):(0));
@@ -354,6 +354,7 @@ bool loadMap(ALLEGRO_DISPLAY *display, string path){
 	if(sizeY > 100 || sizeY < 2) return false;
 	getline(file, data);
 	bombsCount = atoi(data.c_str());
+	bombsCountEditor = atoi(data.c_str());
 	if(bombsCount > sizeX * sizeY - 2 || bombsCount < 0) return false;
 	getline(file, data);
 	playerPos = atoi(data.c_str());
@@ -560,7 +561,7 @@ void setBomb(Coords location){
 					map[tileNumber + sizeX + 1].color = mapColors.nearBomb;
 				}
 			}
-			bombsCount++;
+			bombsCountEditor++;
 			map[tileNumber].type = -1;
 			map[tileNumber].flag = 1;
 			map[tileNumber].color = mapColors.bomb;

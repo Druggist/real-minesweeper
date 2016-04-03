@@ -7,7 +7,6 @@
 #include <allegro5/allegro_native_dialog.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
-#include <iostream>
 #include <fstream>
 #include <string>
 #include "global.h"
@@ -37,7 +36,7 @@ struct Colors {
 	ALLEGRO_COLOR nearBomb;
 };
 
-extern short int sizeX, sizeY, bombsCount, flaggedBombs, openTiles;
+extern short int sizeX, sizeY, bombsCount, bombsCountEditor, flaggedBombs, openTiles;
 extern Tile *map;
 extern Colors mapColors;
 extern short int *bombsPos, playerPos;  

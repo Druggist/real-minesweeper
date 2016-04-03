@@ -470,7 +470,11 @@ void drawEditorGui(){
 	al_draw_filled_rectangle(0, 0, displayWidth, 100, al_map_rgb(255, 243, 224));
 	al_draw_filled_rectangle(displayWidth / 2 - 35, 20, displayWidth / 2 + 35, 90, currentColor);
 	if(currentMode == 7) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,displayWidth / 2, 35 + 6, ALLEGRO_ALIGN_CENTRE, "?");
+
+	string tempText = "Bombs: " + to_string(bombsCountEditor);
+	setText(1, tempText);
 	al_draw_text((small)?(menu[0].smallerFont):(menu[0].font), menu[0].mainColor, 40, menu[0].location.y * (al_get_font_line_height((small)?(menu[0].smallerFont):(menu[0].font))) + 20, ALLEGRO_ALIGN_LEFT, menu[0].text.c_str());
+	al_draw_text((small)?(menu[1].smallerFont):(menu[1].font), menu[1].mainColor, displayWidth  - 40, menu[1].location.y * (al_get_font_line_height((small)?(menu[1].smallerFont):(menu[1].font))) + 20, ALLEGRO_ALIGN_RIGHT, menu[1].text.c_str());
 	al_flip_display();
 }
 
@@ -496,10 +500,11 @@ void menuLogic(){
 		al_stop_sample(&soundtrackId);
 		isEditing = true;
 		resetScroll();
+		bombsCount = 0;
 		templateEditorGui();
 	} else if(nextAction == "SAVE_MAP_EDITOR"){
 		templateBombsQuantity();
-		setText(4, to_string(bombsCount));
+		setText(4, to_string(bombsCountEditor));
 	} else if(nextAction == "PAUSE_EDITOR"){
 		bombsCount = getPlacedBombsCount();
 		templatePauseEditor();
@@ -513,6 +518,7 @@ void menuLogic(){
 			openAll();
 			setEditorColors();
 			isEditing = true;
+			bombsCount = 0;
 			resetScroll();
 			al_stop_sample(&soundtrackId);
 			templateEditorGui();
@@ -572,8 +578,8 @@ void menuLogic(){
 		setText(10, to_string(size.y));		
 	} else if(nextAction == "SUBSTRACT_BOMBS"){
 		if(inEditorMenu){
-			if(bombsCount > getPlacedBombsCount()) bombsCount--;
-			setText(4, to_string(bombsCount));
+			if(bombsCountEditor > getPlacedBombsCount()) bombsCountEditor--;
+			setText(4, to_string(bombsCountEditor));
 		} else {
 			if(bombs > 1) bombs--;	
 			setText(16, to_string(bombs));	
@@ -586,8 +592,8 @@ void menuLogic(){
 		setText(10, to_string(size.y));		
 	} else if(nextAction == "ADD_BOMBS"){
 		if(inEditorMenu){
-			if(bombsCount < getPlacedBombsCount() + getRandomTilesCount() - 1) bombsCount++;
-			setText(4, to_string(bombsCount));
+			if(bombsCountEditor < getPlacedBombsCount() + getRandomTilesCount() - 1) bombsCountEditor++;
+			setText(4, to_string(bombsCountEditor));
 		} else {
 			if(bombs < size.x * size.y - 2) bombs++;
 			setText(16, to_string(bombs));		
@@ -719,6 +725,8 @@ void startPlaying(){
 	al_stop_sample(&soundtrackId);
 	gameTime = 0.0;
 	isPlaying = true;
+	bombsCountEditor = 0;
+	setFlag = 0;
 	templateGameGui();
 	playTileSound();
 	setScroll();
@@ -878,13 +886,13 @@ void crown(){
 void scroll(int scrollFlag){
 	if(isPlaying){
 		//scroll up
-		if((player.location.y - verticalScroll) * pixels + pixels <= pixels + gap  + pixels / 2 && size.y * (pixels + gap) > al_get_display_height(window) - 100 && player.location.y > 0) verticalScroll--;
+		if((player.location.y - verticalScroll) * pixels + pixels <= (pixels + gap) * 2  + pixels / 2 && size.y * (pixels + gap) > al_get_display_height(window) - 100 && player.location.y > 1) verticalScroll--;
 		//scroll down
-		if(al_get_display_height(window) - pixels - ((player.location.y - verticalScroll) * pixels + pixels) <= pixels + gap + pixels / 2 && size.y * (pixels + gap) > al_get_display_height(window) - 100 && player.location.y < size.y - 1) verticalScroll++;
+		if(al_get_display_height(window) - pixels - ((player.location.y - verticalScroll) * pixels + pixels) <= (pixels + gap) * 2 + pixels / 2 && size.y * (pixels + gap) > al_get_display_height(window) - 100 && player.location.y < size.y - 2) verticalScroll++;
 		//scroll left
-		if(((player.location.x - horizontalScroll) * pixels + pixels) <= pixels + gap  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x > 0) horizontalScroll--;
+		if(((player.location.x - horizontalScroll) * pixels + pixels) <= (pixels + gap) * 2  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x > 1) horizontalScroll--;
 		//scroll right
-		if(al_get_display_width(window) - ((player.location.x - horizontalScroll) * pixels + pixels) <= pixels + gap  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x < size.x - 1) horizontalScroll++;
+		if(al_get_display_width(window) - ((player.location.x - horizontalScroll) * pixels + pixels) <= (pixels + gap) * 2  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x < size.x - 2) horizontalScroll++;
 	}else if(isEditing){
 		int lastTileX =  (map[size.x * size.y - 1].location.x - horizontalScroll) * pixels + pixels;
 		int lastTileY = (map[size.x * size.y - 1].location.y - verticalScroll) * pixels + pixels + 100;

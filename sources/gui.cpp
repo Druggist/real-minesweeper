@@ -399,9 +399,10 @@ void templateGameGui(){
 
 void templateEditorGui(){
 	destroyMenu();
-	initMenu(1, "");
-	generateMenu(true, 1);
+	initMenu(2, "");
+	generateMenu(true, 2);
 	menu[0].hover = false;
 	setText(0, "Vertical");
+	setText(1, "Bombs: 0");
 }
 
