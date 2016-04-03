@@ -349,6 +349,7 @@ void drawGame(){
 
 	int horizontalGap, verticalGap;
 	int displayWidth = al_get_display_width(window);
+	int displayHeight = al_get_display_height(window);
 	Coords start, end;
 	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
 	int verticalMargin = 100;
@@ -371,6 +372,13 @@ void drawGame(){
 			}
 		}
 	}
+
+	if(verticalScroll > 0) al_draw_line(0, 100, displayWidth, 100, al_map_rgba(230, 81, 0, 150), 20);
+	if(end.y > displayHeight) al_draw_line(0, displayHeight, displayWidth, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
+	if(horizontalScroll > 0) al_draw_line(0, 100, 0, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
+	if(end.x > displayWidth) al_draw_line(displayWidth, 100, displayWidth, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
+	
+	drawGameGui();
 	drawGameGui();
 }
 
@@ -401,6 +409,7 @@ void drawEditor(){
 
 	int horizontalGap, verticalGap;
 	int displayWidth = al_get_display_width(window);
+	int displayHeight = al_get_display_height(window);
 	Coords start, end;
 	int horizontalMargin = (displayWidth > size.x * pixels + (size.x - 1) * gap)?((displayWidth - (size.x * pixels + (size.x - 1) * gap))/2):(0);
 	int verticalMargin = 100;	
@@ -419,6 +428,12 @@ void drawEditor(){
 			if(map[i].type == -5 && i != playerPos) al_draw_text(mapColors.questionMarkFont , mapColors.questionMarkFontColor ,(start.x + end.x) / 2, start.y + 6, ALLEGRO_ALIGN_CENTRE, "?");
 		}
 	}
+
+	if(verticalScroll > 0) al_draw_line(0, 100, displayWidth, 100, al_map_rgba(230, 81, 0, 150), 20);
+	if(end.y > displayHeight) al_draw_line(0, displayHeight, displayWidth, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
+	if(horizontalScroll > 0) al_draw_line(0, 100, 0, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
+	if(end.x > displayWidth) al_draw_line(displayWidth, 100, displayWidth, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
+
 	drawEditorGui();
 }
 
@@ -541,7 +556,7 @@ void menuLogic(){
 	} else if(nextAction == "HARD"){
 		size.x = 20;
 		size.y = 20;
-		bombs = 50;
+		bombs = 100;
 		newGame();
 		playTileSound();		
 	} else if(nextAction == "CUSTOM"){
@@ -704,9 +719,9 @@ void startPlaying(){
 	al_stop_sample(&soundtrackId);
 	gameTime = 0.0;
 	isPlaying = true;
-	setScroll();
 	templateGameGui();
 	playTileSound();
+	setScroll();
 }
 
 void loadGame(string map){
