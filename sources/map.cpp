@@ -506,7 +506,7 @@ void removeBomb(Coords location){
 					map[tileNumber + sizeX + 1].color = (map[tileNumber + sizeX + 1].type == 0)?(mapColors.empty):(mapColors.nearBomb);
 				}
 			}
-			bombsCount--;
+			bombsCountEditor--;
 			map[tileNumber].type = checkNeighbours(location);
 			map[tileNumber].flag = 1;
 			map[tileNumber].color = (map[tileNumber].type == 0)?(mapColors.empty):(mapColors.nearBomb); 
