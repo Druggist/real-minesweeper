@@ -886,12 +886,13 @@ void scroll(int scrollFlag){
 		//scroll right
 		if(al_get_display_width(window) - ((player.location.x - horizontalScroll) * pixels + pixels) <= pixels + gap  + pixels / 2 && size.x * (pixels + gap) > al_get_display_width(window) && player.location.x < size.x - 1) horizontalScroll++;
 	}else if(isEditing){
-		int tilesOnScreenVertical = (al_get_display_height(window) - 100) / (pixels + gap);
-		int tilesOnScreenHorizontal = al_get_display_width(window) / (pixels + gap);
+		int lastTileX =  (map[size.x * size.y - 1].location.x - horizontalScroll) * pixels + pixels;
+		int lastTileY = (map[size.x * size.y - 1].location.y - verticalScroll) * pixels + pixels + 100;
+
 		if(scrollFlag == 1 && verticalScroll > 0 && size.y * (pixels + gap) > al_get_display_height(window) - 100) verticalScroll--;
-		if(scrollFlag == 2 && verticalScroll < size.y - tilesOnScreenVertical && size.y * (pixels + gap) > al_get_display_height(window) - 100) verticalScroll++;
+		if(scrollFlag == 2 && lastTileY > al_get_display_height(window) && size.y * (pixels + gap) > al_get_display_height(window) - 100) verticalScroll++;
 		if(scrollFlag == 3 && horizontalScroll > 0 && size.x * (pixels + gap) > al_get_display_width(window)) horizontalScroll--;
-		if(scrollFlag == 4 && horizontalScroll < size.x - tilesOnScreenHorizontal && size.x * (pixels + gap) > al_get_display_width(window)) horizontalScroll++;
+		if(scrollFlag == 4 && lastTileX > al_get_display_width(window) && size.x * (pixels + gap) > al_get_display_width(window)) horizontalScroll++;
 	}
 }
 
