@@ -377,8 +377,7 @@ void drawGame(){
 	if(end.y > displayHeight) al_draw_line(0, displayHeight, displayWidth, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
 	if(horizontalScroll > 0) al_draw_line(0, 100, 0, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
 	if(end.x > displayWidth) al_draw_line(displayWidth, 100, displayWidth, displayHeight, al_map_rgba(230, 81, 0, 150), 20);
-	
-	drawGameGui();
+    
 	drawGameGui();
 }
 
