@@ -858,27 +858,31 @@ void crown(){
 	end.x = displayWidth / 2 + 300;
 	end.y = displayHeight / 2 + 150;
 
-	al_draw_filled_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(255, 229, 127));
-	al_draw_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(253, 216, 53), 10);
-
-	al_draw_filled_triangle(start.x + 50, end.y - 50, displayWidth / 2, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(253, 216, 53));
-	al_draw_filled_triangle(start.x + 50, end.y - 50, start.x + 50, start.y + 50, displayWidth / 2, end.y - 50, al_map_rgb(251, 192, 45));
-	al_draw_filled_triangle(displayWidth / 2, end.y - 50, end.x - 50, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(249, 168, 37));
-	al_flip_display();
-
 	for(int i = 0; i < 3; i++){
-	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(240, 98, 146));
-	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(240, 98, 146));
-	al_draw_filled_circle(start.x + 100, end.y - 100, 15, al_map_rgb(236, 64, 122));
-	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(236, 64, 122));
-	al_flip_display();
-	al_rest(0.1);
-	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(186, 104, 200));
-	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(186, 104, 200));
-	al_draw_filled_circle(start.x + 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
-	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
-	al_flip_display();
-	al_rest(0.25);
+        al_draw_filled_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(255, 229, 127));
+        al_draw_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(253, 216, 53), 10);
+
+        al_draw_filled_triangle(start.x + 50, end.y - 50, displayWidth / 2, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(253, 216, 53));
+        al_draw_filled_triangle(start.x + 50, end.y - 50, start.x + 50, start.y + 50, displayWidth / 2, end.y - 50, al_map_rgb(251, 192, 45));
+        al_draw_filled_triangle(displayWidth / 2, end.y - 50, end.x - 50, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(249, 168, 37));
+    	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(240, 98, 146));
+    	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(240, 98, 146));
+    	al_draw_filled_circle(start.x + 100, end.y - 100, 15, al_map_rgb(236, 64, 122));
+    	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(236, 64, 122));
+    	al_flip_display();
+    	al_rest(0.1);
+        al_draw_filled_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(255, 229, 127));
+        al_draw_rounded_rectangle(start.x, start.y, end.x, end.y, 10, 10, al_map_rgb(253, 216, 53), 10);
+
+        al_draw_filled_triangle(start.x + 50, end.y - 50, displayWidth / 2, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(253, 216, 53));
+        al_draw_filled_triangle(start.x + 50, end.y - 50, start.x + 50, start.y + 50, displayWidth / 2, end.y - 50, al_map_rgb(251, 192, 45));
+        al_draw_filled_triangle(displayWidth / 2, end.y - 50, end.x - 50, start.y + 50, end.x - 50, end.y - 50, al_map_rgb(249, 168, 37));
+    	al_draw_filled_circle(displayWidth / 2, end.y - 120, 20, al_map_rgb(186, 104, 200));
+    	al_draw_filled_circle(displayWidth / 2, start.y + 150, 15, al_map_rgb(186, 104, 200));
+    	al_draw_filled_circle(start.x + 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
+    	al_draw_filled_circle(end.x - 100, end.y - 100, 15, al_map_rgb(171, 71, 188));
+    	al_flip_display();
+    	al_rest(0.25);
 	}
 }
 
